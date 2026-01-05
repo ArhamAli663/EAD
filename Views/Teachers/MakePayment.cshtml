@@ -200,7 +200,7 @@
                         </div>
 
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-success btn-lg">
+                            <button type="button" class="btn btn-success btn-lg" id="payNowBtn" onclick="processPayment()">
                                 <i class="fas fa-check-circle"></i> Pay Rs. @Model.TotalBill Now
                             </button>
                             <a asp-action="ViewBills" class="btn btn-secondary">
@@ -234,6 +234,86 @@
                 value = value.substring(0, 2) + '/' + value.substring(2, 4);
             }
             input.value = value;
+        }
+
+        // AJAX Payment Processing
+        async function processPayment() {
+            const form = document.querySelector('form');
+            const cardNumber = document.getElementById('cardNumber').value;
+            const cardHolderName = document.getElementById('cardHolderName').value;
+            const expiryDate = document.getElementById('expiryDate').value;
+            const cvv = document.getElementById('cvv').value;
+            const terms = document.getElementById('terms').checked;
+            const billId = @Model.BillId;
+            
+            // Validate form
+            if (!cardNumber || cardNumber.replace(/\s/g, '').length < 16) {
+                MMS.toast.error('Please enter a valid 16-digit card number.');
+                return;
+            }
+            
+            if (!cardHolderName) {
+                MMS.toast.error('Please enter the card holder name.');
+                return;
+            }
+            
+            if (!expiryDate || expiryDate.length < 5) {
+                MMS.toast.error('Please enter a valid expiry date (MM/YY).');
+                return;
+            }
+            
+            if (!cvv || cvv.length < 3) {
+                MMS.toast.error('Please enter a valid 3-digit CVV.');
+                return;
+            }
+            
+            if (!terms) {
+                MMS.toast.error('Please agree to the terms and conditions.');
+                return;
+            }
+            
+            const payBtn = document.getElementById('payNowBtn');
+            payBtn.disabled = true;
+            payBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing Payment...';
+            
+            try {
+                const result = await MMS.post(`/api/api/bills/${billId}/pay`, {
+                    cardNumber: cardNumber,
+                    cardHolderName: cardHolderName,
+                    expiryDate: expiryDate,
+                    cvv: cvv,
+                    paymentMethod: 'Card'
+                });
+                
+                if (result.success) {
+                    // Show success message with transaction details
+                    const successHtml = `
+                        <div class="text-center py-4">
+                            <div class="mb-3">
+                                <i class="fas fa-check-circle text-success" style="font-size: 5rem;"></i>
+                            </div>
+                            <h3 class="text-success mb-3">Payment Successful!</h3>
+                            <p class="mb-2"><strong>Amount Paid:</strong> Rs. ${result.data.amount}</p>
+                            <p class="mb-2"><strong>Transaction ID:</strong> <code>${result.data.transactionId}</code></p>
+                            <p class="mb-4"><strong>Date:</strong> ${new Date(result.data.paidDate).toLocaleString()}</p>
+                            <a href="/Teachers/ViewBills" class="btn btn-success btn-lg">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Bills
+                            </a>
+                        </div>
+                    `;
+                    
+                    document.querySelector('.card-body').innerHTML = successHtml;
+                    MMS.toast.success('Payment completed successfully!');
+                } else {
+                    MMS.toast.error(result.message || 'Payment failed. Please try again.');
+                    payBtn.disabled = false;
+                    payBtn.innerHTML = '<i class="fas fa-check-circle"></i> Pay Rs. @Model.TotalBill Now';
+                }
+            } catch (error) {
+                MMS.toast.error(error.message || 'An error occurred while processing payment.');
+                payBtn.disabled = false;
+                payBtn.innerHTML = '<i class="fas fa-check-circle"></i> Pay Rs. @Model.TotalBill Now';
+            }
         }
 
         // Add card type detection and icon

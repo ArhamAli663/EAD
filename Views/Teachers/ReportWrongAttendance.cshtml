@@ -217,7 +217,7 @@
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form asp-action="ReportWrongAttendance" method="post">
+            <form id="reportForm">
                 @Html.AntiForgeryToken()
                 <div class="modal-body">
                     <input type="hidden" name="attendanceId" id="attendanceId" />
@@ -257,7 +257,7 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         <i class="fas fa-times"></i> Cancel
                     </button>
-                    <button type="submit" class="btn btn-warning">
+                    <button type="button" class="btn btn-warning" id="submitReportBtn" onclick="submitReport()">
                         <i class="fas fa-paper-plane"></i> Submit Report
                     </button>
                 </div>
@@ -268,7 +268,15 @@
 
 @section Scripts {
     <script>
+        let currentAttendanceId = null;
+        let reportModal = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            reportModal = new bootstrap.Modal(document.getElementById('reportModal'));
+        });
+
         function openReportModal(attendanceId, date, lunch, dinner) {
+            currentAttendanceId = attendanceId;
             document.getElementById('attendanceId').value = attendanceId;
             document.getElementById('reportDate').textContent = date;
             
@@ -283,6 +291,53 @@
             
             // Clear previous reason
             document.getElementById('reason').value = '';
+        }
+
+        async function submitReport() {
+            const reason = document.getElementById('reason').value.trim();
+            const attendanceId = currentAttendanceId;
+            
+            if (!reason) {
+                MMS.toast.error('Please describe the issue with your attendance.');
+                document.getElementById('reason').focus();
+                return;
+            }
+            
+            const submitBtn = document.getElementById('submitReportBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+            
+            try {
+                const result = await MMS.post('/api/api/disputes', {
+                    attendanceId: attendanceId,
+                    reason: reason
+                });
+                
+                if (result.success) {
+                    // Close modal
+                    reportModal.hide();
+                    
+                    MMS.toast.success(result.message || 'Dispute submitted successfully!');
+                    
+                    // Update the button in the table to show "Already Reported"
+                    const reportBtn = document.querySelector(`button[onclick*="openReportModal(${attendanceId}"]`);
+                    if (reportBtn) {
+                        const td = reportBtn.parentElement;
+                        td.innerHTML = `
+                            <span class="badge bg-warning text-dark">
+                                <i class="fas fa-clock"></i> Already Reported
+                            </span>
+                        `;
+                    }
+                } else {
+                    MMS.toast.error(result.message || 'Failed to submit report.');
+                }
+            } catch (error) {
+                MMS.toast.error(error.message || 'An error occurred while submitting the report.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Report';
+            }
         }
     </script>
 }

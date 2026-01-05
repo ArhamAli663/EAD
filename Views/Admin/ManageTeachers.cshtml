@@ -316,7 +316,7 @@
     </div>
 </div>
 
-<!-- Delete Confirmation Form -->
+<!-- Delete Confirmation Form (kept as backup) -->
 <form id="deleteForm" method="post" asp-action="DeleteTeacher" style="display:none;">
     @Html.AntiForgeryToken()
     <input type="hidden" id="deleteId" name="id" />
@@ -324,10 +324,75 @@
 
 @section Scripts {
     <script>
-        function confirmDelete(id, name) {
-            if (confirm(`⚠️ WARNING: Are you sure you want to PERMANENTLY DELETE teacher "${name}"?\n\nThis will remove:\n• Teacher profile\n• Login account\n• All attendance records\n• All billing records\n\nThis action CANNOT be undone!`)) {
-                document.getElementById('deleteId').value = id;
-                document.getElementById('deleteForm').submit();
+        // AJAX-based delete function with confirmation
+        async function confirmDelete(id, name) {
+            const confirmed = await MMS.confirm(
+                `<strong>⚠️ WARNING:</strong> Are you sure you want to <span class="text-danger">PERMANENTLY DELETE</span> teacher "<strong>${name}</strong>"?
+                <br><br>
+                <small class="text-muted">This will remove:</small>
+                <ul class="small text-muted mb-0">
+                    <li>Teacher profile</li>
+                    <li>Login account</li>
+                    <li>All attendance records</li>
+                    <li>All billing records</li>
+                </ul>
+                <br>
+                <span class="text-danger"><i class="fas fa-exclamation-triangle"></i> This action CANNOT be undone!</span>`,
+                'Confirm Delete Teacher'
+            );
+            
+            if (!confirmed) return;
+            
+            try {
+                const result = await MMS.delete(`/api/api/teachers/${id}`);
+                
+                if (result.success) {
+                    MMS.toast.success(result.message || `Teacher "${name}" deleted successfully.`);
+                    
+                    // Remove the row with animation
+                    const row = document.querySelector(`button[onclick*="confirmDelete(${id}"]`).closest('tr');
+                    if (row) {
+                        row.style.transition = 'all 0.5s ease';
+                        row.style.backgroundColor = '#f8d7da';
+                        row.style.opacity = '0';
+                        row.style.transform = 'translateX(-50px)';
+                        setTimeout(() => {
+                            row.remove();
+                            // Update row numbers
+                            updateRowNumbers();
+                        }, 500);
+                    }
+                } else {
+                    MMS.toast.error(result.message || 'Failed to delete teacher.');
+                }
+            } catch (error) {
+                MMS.toast.error(error.message || 'An error occurred while deleting.');
+            }
+        }
+
+        // Update row numbers after deletion
+        function updateRowNumbers() {
+            const rows = document.querySelectorAll('#teachersTable tbody tr');
+            rows.forEach((row, index) => {
+                const numberCell = row.querySelector('td:first-child');
+                if (numberCell && !row.querySelector('.empty-state')) {
+                    numberCell.textContent = index + 1;
+                }
+            });
+            
+            // Show empty state if no teachers left
+            if (rows.length === 0) {
+                const tbody = document.querySelector('#teachersTable tbody');
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9">
+                            <div class="empty-state">
+                                <i class="fas fa-users"></i>
+                                <p class="mb-0">No teachers found. Click "Add New Teacher" to get started.</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
             }
         }
 
