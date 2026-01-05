@@ -1,0 +1,236 @@
+@model IEnumerable<MessManagementSystem.Models.Bill>
+
+@{
+    ViewData["Title"] = "My Bills";
+    var teacherName = ViewBag.TeacherName;
+    var totalUnpaid = ViewBag.TotalUnpaid;
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-action="Index"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li class="breadcrumb-item active">My Bills</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Help Instructions -->
+    <div class="alert alert-info shadow-sm mb-4" style="border-left: 5px solid #0dcaf0;">
+        <h6 class="mb-2"><i class="fas fa-lightbulb me-2"></i><strong>Understanding Your Bills:</strong></h6>
+        <div class="row small">
+            <div class="col-md-4">
+                <strong><i class="fas fa-utensils me-1"></i> Food Bill:</strong> Cost of meals consumed (Lunch + Dinner)
+            </div>
+            <div class="col-md-4">
+                <strong><i class="fas fa-tint me-1"></i> Water Bill:</strong> Fixed monthly charge for water usage
+            </div>
+            <div class="col-md-4">
+                <strong><i class="fas fa-credit-card me-1"></i> Total Bill:</strong> Food + Water charges combined
+            </div>
+        </div>
+        <hr class="my-2">
+        <div class="small">
+            <strong>To pay a bill:</strong> Click the "View Details" button and then click "Pay Now"
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="text-primary mb-2">
+                        <i class="fas fa-file-invoice-dollar fa-3x"></i>
+                    </div>
+                    <h3 class="mb-0">@Model.Count()</h3>
+                    <p class="text-muted mb-0">Total Bills</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="text-success mb-2">
+                        <i class="fas fa-check-circle fa-3x"></i>
+                    </div>
+                    <h3 class="mb-0">@Model.Count(b => b.IsPaid)</h3>
+                    <p class="text-muted mb-0">Paid Bills</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="text-danger mb-2">
+                        <i class="fas fa-exclamation-circle fa-3x"></i>
+                    </div>
+                    <h3 class="mb-0">Rs. @totalUnpaid</h3>
+                    <p class="text-muted mb-0">Total Unpaid</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-file-invoice"></i> Billing History</h4>
+                </div>
+                <div class="card-body">
+                    @if (Model != null && Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="billsTable">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Month/Year</th>
+                                        <th>Meals Consumed</th>
+                                        <th>Food Bill</th>
+                                        <th>Water Bill</th>
+                                        <th>Total Bill</th>
+                                        <th>Unpaid Balance</th>
+                                        <th>Status</th>
+                                        <th>Generated Date</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        int counter = 1;
+                                    }
+                                    @foreach (var bill in Model)
+                                    {
+                                        <tr class="@(bill.IsPaid ? "" : "table-warning")">
+                                            <td>@counter</td>
+                                            <td>
+                                                <strong>@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(bill.Month) @bill.Year</strong>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">@bill.TotalMealsConsumed</span>
+                                            </td>
+                                            <td>Rs. @bill.FoodBill</td>
+                                            <td>Rs. @bill.WaterBill</td>
+                                            <td>
+                                                <strong>Rs. @bill.TotalBill</strong>
+                                            </td>
+                                            <td>
+                                                @if (bill.UnpaidBalance > 0)
+                                                {
+                                                    <span class="text-danger"><strong>Rs. @bill.UnpaidBalance</strong></span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-success">Rs. 0</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (bill.IsPaid)
+                                                {
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-check-circle"></i> Paid
+                                                    </span>
+                                                    @if (bill.PaidDate.HasValue)
+                                                    {
+                                                        <br />
+                                                        <small class="text-muted">@bill.PaidDate.Value.ToString("dd MMM yyyy")</small>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger">
+                                                        <i class="fas fa-times-circle"></i> Unpaid
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <small>@bill.GeneratedDate.ToString("dd MMM yyyy")</small>
+                                            </td>
+                                            <td>
+                                                @if (!bill.IsPaid)
+                                                {
+                                                    <a asp-action="MakePayment" asp-route-id="@bill.BillId" class="btn btn-sm btn-success mb-1">
+                                                        <i class="fas fa-credit-card"></i> Pay Now
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    @if (!string.IsNullOrEmpty(bill.TransactionId))
+                                                    {
+                                                        <small class="text-muted d-block mb-1">
+                                                            <i class="fas fa-receipt"></i> @bill.TransactionId
+                                                        </small>
+                                                    }
+                                                }
+                                                <a asp-action="BillDetails" asp-route-id="@bill.BillId" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i> View Details
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        counter++;
+                                    }
+                                </tbody>
+                                <tfoot class="table-light">
+                                    <tr>
+                                        <th colspan="5" class="text-end">Total:</th>
+                                        <th>Rs. @Model.Sum(b => b.TotalBill)</th>
+                                        <th class="text-danger">Rs. @Model.Sum(b => b.UnpaidBalance)</th>
+                                        <th colspan="3"></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-info-circle fa-2x mb-2"></i>
+                            <h5>No Bills Generated Yet</h5>
+                            <p class="mb-0">Your billing history will appear here once bills are generated.</p>
+                        </div>
+                    }
+
+                    <div class="mt-3 text-center">
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Dashboard
+                        </a>
+                        @if (Model != null && Model.Any(b => !b.IsPaid))
+                        {
+                            <a asp-action="PayAllBills" class="btn btn-success">
+                                <i class="fas fa-credit-card"></i> Pay All Unpaid Bills
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#billsTable').DataTable({
+                "order": [[1, "desc"]],
+                "pageLength": 10,
+                "language": {
+                    "search": "Search:",
+                    "lengthMenu": "Show _MENU_ bills per page"
+                }
+            });
+        });
+    </script>
+}

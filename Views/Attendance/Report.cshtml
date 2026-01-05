@@ -1,0 +1,467 @@
+@model dynamic
+
+@{
+    ViewData["Title"] = "Monthly Attendance Report";
+    var selectedMonth = (int)ViewBag.SelectedMonth;
+    var selectedYear = (int)ViewBag.SelectedYear;
+    var monthName = new DateTime(selectedYear, selectedMonth, 1).ToString("MMMM yyyy");
+}
+
+<style>
+    .report-container {
+        padding: 2rem 0;
+        min-height: 100vh;
+    }
+
+    .page-header-report {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        padding: 1.5rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        color: white;
+        box-shadow: 0 10px 30px rgba(17, 153, 142, 0.3);
+        animation: slideDown 0.5s ease-out;
+    }
+
+    .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin: 0;
+    }
+
+    .breadcrumb-item + .breadcrumb-item::before {
+        color: rgba(255,255,255,0.7);
+    }
+
+    .breadcrumb a {
+        color: white;
+        text-decoration: none;
+    }
+
+    .breadcrumb-item.active {
+        color: rgba(255,255,255,0.9);
+    }
+
+    .filter-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        animation: slideUp 0.6s ease-out;
+    }
+
+    .period-card {
+        border: none;
+        border-radius: 15px;
+        background: linear-gradient(135deg, #17a2b8, #138496);
+        box-shadow: 0 10px 30px rgba(23, 162, 184, 0.3);
+        animation: slideUp 0.6s ease-out 0.1s both;
+    }
+
+    .generate-btn {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        border: none;
+        padding: 12px;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(17, 153, 142, 0.3);
+    }
+
+    .generate-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(17, 153, 142, 0.4);
+    }
+
+    .report-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+        overflow: hidden;
+        animation: slideUp 0.6s ease-out 0.2s both;
+    }
+
+    .report-card .card-header {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        padding: 1.5rem;
+        border: none;
+    }
+
+    .stat-card {
+        border: none;
+        border-radius: 15px;
+        transition: all 0.3s ease;
+        animation: zoomIn 0.6s ease-out;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    }
+
+    .stat-card.lunch-stat {
+        background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+    }
+
+    .stat-card.dinner-stat {
+        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    }
+
+    .stat-card.total-stat {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+
+    .report-table {
+        margin: 0;
+    }
+
+    .report-table thead {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+
+    .report-table thead th {
+        font-weight: 700;
+        padding: 1rem;
+        border: none;
+        color: #495057;
+    }
+
+    .report-table tbody tr {
+        transition: all 0.3s ease;
+    }
+
+    .report-table tbody tr:hover {
+        background: linear-gradient(90deg, rgba(17, 153, 142, 0.05) 0%, rgba(56, 239, 125, 0.05) 100%);
+        transform: scale(1.01);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+
+    .report-table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+
+    .report-table tfoot {
+        background: linear-gradient(135deg, #11998e15 0%, #38ef7d15 100%);
+        font-weight: 700;
+    }
+
+    .meal-count-badge {
+        padding: 8px 16px;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 1rem;
+    }
+
+    .day-card {
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .day-card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    @@keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes zoomIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+</style>
+
+<div class="container-fluid report-container">
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="page-header-report">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-controller="Admin" asp-action="Index"><i class="fas fa-home"></i> Dashboard</a></li>
+                        <li class="breadcrumb-item"><a asp-action="Index">Attendance</a></li>
+                        <li class="breadcrumb-item active">Monthly Report</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card filter-card">
+                <div class="card-body p-4">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-5">
+                            <label class="form-label fw-bold text-primary">
+                                <i class="fas fa-calendar-alt me-2"></i>Select Month
+                            </label>
+                            <select name="month" class="form-select form-select-lg" style="border: 2px solid #e0e0e0; border-radius: 10px;">
+                                @for (int i = 1; i <= 12; i++)
+                                {
+                                    <option value="@i" selected="@(i == selectedMonth)">
+                                        @(new DateTime(selectedYear, i, 1).ToString("MMMM"))
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-primary">
+                                <i class="fas fa-calendar me-2"></i>Select Year
+                            </label>
+                            <select name="year" class="form-select form-select-lg" style="border: 2px solid #e0e0e0; border-radius: 10px;">
+                                @for (int y = DateTime.Now.Year - 2; y <= DateTime.Now.Year + 1; y++)
+                                {
+                                    <option value="@y" selected="@(y == selectedYear)">@y</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button type="submit" class="btn generate-btn w-100">
+                                <i class="fas fa-search me-2"></i>Generate Report
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card period-card text-white">
+                <div class="card-body text-center p-4">
+                    <h6 class="mb-2">Report Period</h6>
+                    <h3 class="mb-2 fw-bold">@monthName</h3>
+                    <small>View detailed meal consumption</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div class="card report-card">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="fas fa-chart-bar"></i> Meal Consumption Report - @monthName
+            </h5>
+            <div>
+                <button onclick="location.reload()" class="btn btn-sm btn-primary me-2">
+                    <i class="fas fa-sync-alt"></i> Refresh Report
+                </button>
+                <a asp-action="Index" class="btn btn-sm btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Mark Attendance
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        @{
+            var modelList = Model as IEnumerable<dynamic>;
+            var dailySummary = ViewBag.DailySummary as IEnumerable<dynamic>;
+            var hasDailyAttendance = dailySummary != null && dailySummary.Any();
+            var hasTeachers = modelList != null && modelList.Any();
+        }
+        @if (hasTeachers)
+        {
+            @if (hasDailyAttendance)
+            {
+                <!-- Daily Attendance Summary -->
+                <div class="alert alert-success border-success mb-4">
+                    <h6 class="mb-2"><i class="fas fa-calendar-check"></i> <strong>Days with Marked Attendance</strong></h6>
+                    <div class="row g-2">
+                        @if (dailySummary != null)
+                        {
+                            @foreach (var day in dailySummary)
+                            {
+                                var dayDate = (DateTime)day.Date;
+                                <div class="col-md-3">
+                                    <div class="card border-success">
+                                        <div class="card-body p-2 text-center">
+                                            <small class="text-muted d-block">@dayDate.DayOfWeek</small>
+                                            <strong class="text-success">@dayDate.ToString("MMM dd")</strong>
+                                            <br />
+                                            <small class="text-muted">
+                                                <i class="fas fa-users"></i> @day.TeachersCount teacher(s) | 
+                                                <i class="fas fa-utensils"></i> @day.TotalMeals meals
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                    <small class="text-muted mt-2 d-block">
+                        <i class="fas fa-info-circle"></i> Total of <strong>@(dailySummary?.Count() ?? 0)</strong> day(s) with attendance marked in this period. 
+                        Admin can mark attendance for any previous or current date.
+                    </small>
+                </div>
+            }
+            else
+            {
+                <!-- No Daily Attendance -->
+                <div class="alert alert-warning border-warning mb-4">
+                    <h6 class="mb-2"><i class="fas fa-exclamation-triangle"></i> <strong>No Attendance Marked</strong></h6>
+                    <p class="mb-2">No attendance has been marked for any date in @monthName yet.</p>
+                    <a asp-action="Index" class="btn btn-sm btn-primary">
+                        <i class="fas fa-clipboard-check"></i> Go to Mark Attendance
+                    </a>
+                </div>
+            }
+            
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card stat-card lunch-stat text-white">
+                        <div class="card-body text-center p-4">
+                            <h6 class="mb-2"><i class="fas fa-utensils fa-lg"></i> Total Lunches</h6>
+                            <h2 class="mb-0 fw-bold">@(modelList?.Sum(r => (int)r.TotalLunch) ?? 0)</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card stat-card dinner-stat text-white">
+                        <div class="card-body text-center p-4">
+                            <h6 class="mb-2"><i class="fas fa-moon fa-lg"></i> Total Dinners</h6>
+                            <h2 class="mb-0 fw-bold">@(modelList?.Sum(r => (int)r.TotalDinner) ?? 0)</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card stat-card total-stat text-white">
+                        <div class="card-body text-center p-4">
+                            <h6 class="mb-2"><i class="fas fa-calculator fa-lg"></i> Total Meals</h6>
+                            <h2 class="mb-0 fw-bold">@(modelList?.Sum(r => (int)r.TotalMeals) ?? 0)</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                <strong>Report Summary:</strong> Showing meal consumption for <strong>@(modelList?.Count() ?? 0)</strong> teacher(s) during @monthName. 
+                @if (hasDailyAttendance)
+                {
+                    <text>This data is used for monthly bill generation.</text>
+                }
+                else
+                {
+                    <text>No meals have been marked yet for this period.</text>
+                }
+                <br />
+                <small class="text-muted">
+                    <i class="fas fa-sync-alt"></i> This report automatically updates when you mark attendance for any date in this month.
+                    Last generated: <strong>@DateTime.Now.ToString("MMM dd, yyyy hh:mm:ss tt")</strong>
+                </small>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table report-table mb-0" id="reportTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 5%">#</th>
+                            <th style="width: 35%">Teacher Name</th>
+                            <th class="text-center" style="width: 20%">
+                                <i class="fas fa-utensils text-success"></i><br />Lunch
+                            </th>
+                            <th class="text-center" style="width: 20%">
+                                <i class="fas fa-moon text-info"></i><br />Dinner
+                            </th>
+                            <th class="text-center" style="width: 20%">
+                                <i class="fas fa-chart-line"></i><br />Total Meals
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            var index = 1;
+                        }
+                        @if (modelList != null)
+                        {
+                            @foreach (var record in modelList)
+                            {
+                                <tr>
+                                    <td class="text-muted">@index</td>
+                                    <td><strong>@record.TeacherName</strong></td>
+                                <td class="text-center">
+                                    <span class="badge bg-success meal-count-badge">@record.TotalLunch</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-info meal-count-badge">@record.TotalDinner</span>
+                                </td>
+                                <td class="text-center">
+                                    <h5 class="mb-0">
+                                        <span class="badge bg-primary meal-count-badge">@record.TotalMeals</span>
+                                    </h5>
+                                </td>
+                            </tr>
+                            index++;
+                            }
+                        }
+                    </tbody>
+                    <tfoot class="table-light">
+                        <tr>
+                            <td colspan="2"><strong><i class="fas fa-sum"></i> GRAND TOTAL</strong></td>
+                            <td class="text-center">
+                                <strong class="text-success" style="font-size: 1.2rem;">@(modelList?.Sum(r => (int)r.TotalLunch) ?? 0)</strong>
+                            </td>
+                            <td class="text-center">
+                                <strong class="text-info" style="font-size: 1.2rem;">@(modelList?.Sum(r => (int)r.TotalDinner) ?? 0)</strong>
+                            </td>
+                            <td class="text-center">
+                                <h5 class="mb-0">
+                                    <strong class="text-primary" style="font-size: 1.3rem;">@(modelList?.Sum(r => (int)r.TotalMeals) ?? 0)</strong>
+                                </h5>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="mt-4 d-flex justify-content-between align-items-center">
+                <div>
+                    <a asp-controller="Billing" asp-action="Generate" class="btn btn-success btn-lg">
+                        <i class="fas fa-file-invoice-dollar"></i> Generate Bills for This Period
+                    </a>
+                </div>
+                <div class="text-muted">
+                    <small>
+                        <i class="fas fa-clock"></i> Report generated on @DateTime.Now.ToString("MMM dd, yyyy hh:mm tt")
+                    </small>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="fas fa-chart-line fa-4x text-muted mb-3"></i>
+                <h5 class="text-muted">No Attendance Data Found</h5>
+                <p class="text-muted">No attendance has been marked for @monthName yet.</p>
+                <a asp-action="Index" class="btn btn-primary">
+                    <i class="fas fa-clipboard-check"></i> Go to Mark Attendance
+                </a>
+            </div>
+        }
+    </div>
+</div>

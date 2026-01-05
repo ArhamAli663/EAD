@@ -1,0 +1,720 @@
+@model IEnumerable<MessManagementSystem.Models.Attendance>
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<style>
+    /* Force visibility for dashboard content */
+    .container-fluid {
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    .card {
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    .row {
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    .system-status {
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+</style>
+
+@if (Model == null && ViewBag.TotalTeachers == null)
+{
+    <div class="container py-5">
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Unable to load dashboard data.</strong> Please try refreshing the page or contact support if the issue persists.
+        </div>
+    </div>
+}
+else
+{
+
+<style>
+    .stat-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.1) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .stat-card:hover::before {
+        opacity: 1;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 20px 40px var(--shadow) !important;
+    }
+
+    .stat-card .icon-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover .icon-circle {
+        transform: rotate(360deg) scale(1.1);
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #11998e, #38ef7d);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .card {
+        border-radius: 16px;
+        transition: all 0.3s ease;
+    }
+
+    .card-header {
+        border-radius: 16px 16px 0 0 !important;
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        border: none;
+    }
+
+    .quick-action-btn {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 12px;
+        padding: 14px 24px;
+        font-weight: 600;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .quick-action-btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .quick-action-btn:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .quick-action-btn:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
+    }
+
+    .table-hover tbody tr {
+        transition: all 0.3s ease;
+    }
+
+    .table-hover tbody tr:hover {
+        transform: scale(1.01);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .badge {
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+
+    .filter-section {
+        animation: slideDown 0.4s ease;
+    }
+
+    @@keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .empty-state {
+        padding: 4rem 2rem;
+        text-align: center;
+        color: var(--text-secondary);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        opacity: 0.5;
+        margin-bottom: 1rem;
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-secondary);
+        margin-bottom: 0.75rem;
+    }
+
+    .border-left-primary {
+        border-left: 5px solid #4e73df !important;
+    }
+
+    .border-left-success {
+        border-left: 5px solid #1cc88a !important;
+    }
+
+    .border-left-info {
+        border-left: 5px solid #36b9cc !important;
+    }
+
+    .border-left-warning {
+        border-left: 5px solid #f6c23e !important;
+    }
+
+    .border-left-danger {
+        border-left: 5px solid #e74a3b !important;
+    }
+
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animated {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    .system-status {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .status-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #4ade80;
+        animation: pulse 2s infinite;
+        display: inline-block;
+    }
+
+    @@keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+        50% {
+            opacity: 0.7;
+            transform: scale(1.1);
+        }
+    }
+</style>
+
+<div class="container-fluid py-4">
+
+<!-- System Status Banner -->
+<div class="system-status animated mb-4 shadow-lg">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h4 class="mb-2" style="color: white !important; font-size: 1.5rem;"><i class="fas fa-tachometer-alt me-2"></i><strong>Admin Dashboard</strong></h4>
+            <p class="mb-2" style="color: white !important; font-size: 1rem;"><i class="fas fa-calendar me-1"></i> <strong>@DateTime.Now.ToString("dddd, MMMM dd, yyyy")</strong> | <i class="fas fa-clock me-1"></i> <strong>@DateTime.Now.ToString("hh:mm tt")</strong></p>
+            <div class="d-flex align-items-center gap-3" style="font-size: 1rem;">
+                <span style="color: white !important;"><span class="status-indicator me-2"></span><strong>System Status:</strong> <strong>All Services Operational</strong></span>
+                <span style="color: rgba(255, 255, 255, 0.7) !important;">|</span>
+                <span style="color: white !important;"><i class="fas fa-database me-1"></i> <strong>Database:</strong> <strong>Connected</strong></span>
+                <span style="color: rgba(255, 255, 255, 0.7) !important;">|</span>
+                <span style="color: white !important;"><i class="fas fa-shield-alt me-1"></i> <strong>Security:</strong> <strong>Active</strong></span>
+            </div>
+        </div>
+        <div class="text-end">
+            <div class="rounded p-3" style="background-color: rgba(255, 255, 255, 0.25) !important; border: 2px solid rgba(255, 255, 255, 0.3) !important;">
+                <p class="mb-1 small" style="color: white !important;"><strong>Quick Stats</strong></p>
+                <h3 class="mb-0 fw-bold" style="color: white !important;">@ViewBag.TotalTeachers</h3>
+                <p class="mb-0 small" style="color: white !important;"><strong>Total Teachers</strong></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4 animated" style="animation-delay: 0.1s;">
+        <a href="@Url.Action("Index", new { filter = "total" })" class="text-decoration-none">
+            <div class="card stat-card border-left-primary">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stat-label">Total Teachers</div>
+                            <div class="stat-number">@ViewBag.TotalTeachers</div>
+                            <small class="text-muted"><i class="fas fa-info-circle"></i> All registered</small>
+                        </div>
+                        <div class="icon-circle">
+                            <i class="fas fa-users fa-2x text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4 animated" style="animation-delay: 0.2s;">
+        <a href="@Url.Action("Index", new { filter = "active" })" class="text-decoration-none">
+            <div class="card stat-card border-left-success">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stat-label text-success">Active Teachers</div>
+                            <div class="stat-number">@ViewBag.ActiveTeachers</div>
+                            <small class="text-muted"><i class="fas fa-check"></i> Currently active</small>
+                        </div>
+                        <div class="icon-circle">
+                            <i class="fas fa-user-check fa-2x text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4 animated" style="animation-delay: 0.3s;">
+        <a href="@Url.Action("Index", new { filter = "users" })" class="text-decoration-none">
+            <div class="card stat-card border-left-info">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stat-label text-info">Total Users</div>
+                            <div class="stat-number">@ViewBag.TotalUsers</div>
+                            <small class="text-muted"><i class="fas fa-users-cog"></i> System users</small>
+                        </div>
+                        <div class="icon-circle">
+                            <i class="fas fa-user-cog fa-2x text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4 animated" style="animation-delay: 0.4s;">
+        <a href="@Url.Action("Index", new { filter = "attendance" })" class="text-decoration-none">
+            <div class="card stat-card border-left-warning">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stat-label text-warning">Today's Attendance</div>
+                            <div class="stat-number">@ViewBag.TodayAttendance</div>
+                            <small class="text-muted"><i class="fas fa-calendar-day"></i> Marked today</small>
+                        </div>
+                        <div class="icon-circle">
+                            <i class="fas fa-calendar-check fa-2x text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Filtered Results Section -->
+@if (!string.IsNullOrEmpty(ViewBag.Filter))
+{
+    <div class="row mb-4 filter-section">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-filter me-2"></i>@ViewBag.FilterTitle</span>
+                    <a href="@Url.Action("Index")" class="btn btn-sm btn-light">
+                        <i class="fas fa-times"></i> Clear Filter
+                    </a>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.Filter == "total" || ViewBag.Filter == "active")
+                    {
+                        var teachers = ViewBag.FilteredTeachers as List<MessManagementSystem.Models.Teacher>;
+                        if (teachers != null && teachers.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th><i class="fas fa-user me-2"></i>Name</th>
+                                            <th><i class="fas fa-building me-2"></i>Department</th>
+                                            <th><i class="fas fa-envelope me-2"></i>Email</th>
+                                            <th><i class="fas fa-phone me-2"></i>Phone</th>
+                                            <th><i class="fas fa-calendar me-2"></i>Joining Date</th>
+                                            <th><i class="fas fa-cogs me-2"></i>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var teacher in teachers)
+                                        {
+                                            <tr>
+                                                <td><strong>@teacher.FullName</strong></td>
+                                                <td>@teacher.Department</td>
+                                                <td>@teacher.Email</td>
+                                                <td>@teacher.PhoneNumber</td>
+                                                <td>@teacher.JoiningDate.ToString("MMM dd, yyyy")</td>
+                                                <td>
+                                                    <a asp-action="ViewTeacherDetails" asp-route-id="@teacher.TeacherId" 
+                                                       class="btn btn-sm btn-info me-1">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a asp-action="EditTeacher" asp-route-id="@teacher.TeacherId" 
+                                                       class="btn btn-sm btn-warning">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="empty-state">
+                                <i class="fas fa-users"></i>
+                                <p>No teachers found.</p>
+                            </div>
+                        }
+                    }
+                    else if (ViewBag.Filter == "users")
+                    {
+                        var users = ViewBag.FilteredUsers as List<MessManagementSystem.Models.User>;
+                        if (users != null && users.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th><i class="fas fa-user me-2"></i>Username</th>
+                                            <th><i class="fas fa-user-tag me-2"></i>Role</th>
+                                            <th><i class="fas fa-toggle-on me-2"></i>Status</th>
+                                            <th><i class="fas fa-calendar me-2"></i>Created Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var user in users)
+                                        {
+                                            <tr>
+                                                <td><strong>@user.Username</strong></td>
+                                                <td>
+                                                    @if (user.Role == "Admin")
+                                                    {
+                                                        <span class="badge bg-danger"><i class="fas fa-user-shield"></i> Admin</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-primary"><i class="fas fa-user"></i> Teacher</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (user.IsActive)
+                                                    {
+                                                        <span class="badge bg-success"><i class="fas fa-check-circle"></i> Active</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-secondary"><i class="fas fa-ban"></i> Inactive</span>
+                                                    }
+                                                </td>
+                                                <td>@user.CreatedDate.ToString("MMM dd, yyyy")</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="empty-state">
+                                <i class="fas fa-user-cog"></i>
+                                <p>No users found.</p>
+                            </div>
+                        }
+                    }
+                    else if (ViewBag.Filter == "attendance")
+                    {
+                        var attendances = ViewBag.FilteredAttendance as List<MessManagementSystem.Models.Attendance>;
+                        if (attendances != null && attendances.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th><i class="fas fa-user me-2"></i>Teacher Name</th>
+                                            <th><i class="fas fa-utensils me-2"></i>Lunch</th>
+                                            <th><i class="fas fa-moon me-2"></i>Dinner</th>
+                                            <th><i class="fas fa-clock me-2"></i>Recorded At</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var attendance in attendances)
+                                        {
+                                            <tr>
+                                                <td><strong>@attendance.Teacher!.FullName</strong></td>
+                                                <td>
+                                                    @if (attendance.LunchTaken)
+                                                    {
+                                                        <span class="badge bg-success"><i class="fas fa-check"></i> Yes</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-secondary"><i class="fas fa-times"></i> No</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (attendance.DinnerTaken)
+                                                    {
+                                                        <span class="badge bg-success"><i class="fas fa-check"></i> Yes</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-secondary"><i class="fas fa-times"></i> No</span>
+                                                    }
+                                                </td>
+                                                <td>@attendance.RecordedDate.ToString("hh:mm tt")</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="empty-state">
+                                <i class="fas fa-calendar-times"></i>
+                                <p>No attendance records for today.</p>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Recent Attendance Records -->
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-list"></i> Recent Attendance Records</span>
+                <a asp-controller="Attendance" asp-action="Index" class="btn btn-sm btn-primary">
+                    <i class="fas fa-calendar-alt"></i> View All
+                </a>
+            </div>
+            <div class="card-body">
+                @if (Model != null && Model.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Teacher Name</th>
+                                    <th>Date</th>
+                                    <th>Lunch</th>
+                                    <th>Dinner</th>
+                                    <th>Recorded</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var attendance in Model)
+                                {
+                                    <tr>
+                                        <td>@attendance.Teacher!.FullName</td>
+                                        <td>@attendance.Date.ToString("MMM dd, yyyy")</td>
+                                        <td>
+                                            @if (attendance.LunchTaken)
+                                            {
+                                                <span class="badge bg-success"><i class="fas fa-check"></i> Yes</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary"><i class="fas fa-times"></i> No</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (attendance.DinnerTaken)
+                                            {
+                                                <span class="badge bg-success"><i class="fas fa-check"></i> Yes</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary"><i class="fas fa-times"></i> No</span>
+                                            }
+                                        </td>
+                                        <td>@attendance.RecordedDate.ToString("MMM dd, hh:mm tt")</td>
+                                        <td>
+                                            <a asp-controller="Attendance" 
+                                               asp-action="Edit" 
+                                               asp-route-id="@attendance.AttendanceId" 
+                                               asp-route-returnDate="@attendance.Date.ToString("yyyy-MM-dd")"
+                                               class="btn btn-sm btn-warning me-1" 
+                                               title="Edit Attendance">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-danger" 
+                                                    onclick="confirmDelete(@attendance.AttendanceId, '@attendance.Teacher!.FullName', '@attendance.Date.ToString("MMM dd, yyyy")')">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-inbox fa-3x mb-3"></i>
+                        <p>No recent attendance records found.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5 class="card-title mb-3">Quick Actions</h5>
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <a asp-controller="Teachers" asp-action="Create" class="btn btn-primary">
+                        <i class="fas fa-user-plus"></i> Add Teacher
+                    </a>
+                    <a asp-controller="Attendance" asp-action="Index" class="btn btn-success">
+                        <i class="fas fa-calendar-check"></i> Mark Attendance
+                    </a>
+                    <a asp-controller="Menu" asp-action="Create" class="btn btn-info">
+                        <i class="fas fa-plus-circle"></i> Add Menu Item
+                    </a>
+                    <a asp-controller="Billing" asp-action="Generate" class="btn btn-warning text-white">
+                        <i class="fas fa-file-invoice"></i> Generate Bills
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Delete Attendance Record
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="deleteForm" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Warning:</strong> This action will delete the attendance record and adjust the bill accordingly.
+                    </div>
+                    <ul>
+                        <li>If the bill is <strong>unpaid</strong>, the bill amount will be reduced.</li>
+                        <li>If the bill is <strong>already paid</strong>, a credit will be applied to the next bill.</li>
+                    </ul>
+                    <p id="deleteMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(attendanceId, teacherName, date) {
+            document.getElementById('deleteForm').action = '@Url.Action("Delete", "Attendance")/' + attendanceId;
+            document.getElementById('deleteMessage').innerHTML = 'Are you sure you want to delete attendance for <strong>' + teacherName + '</strong> on <strong>' + date + '</strong>?';
+            var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            modal.show();
+        }
+
+        // Add smooth animations to cards on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.stat-card, .card');
+            cards.forEach((card, index) => {
+                card.style.animation = `slideDown 0.5s ease-out ${index * 0.1}s both`;
+            });
+        });
+
+        // Add ripple effect to buttons
+        document.querySelectorAll('.btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                ripple.classList.add('ripple');
+                
+                this.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+    </script>
+}
+</div> <!-- End container-fluid -->
+}

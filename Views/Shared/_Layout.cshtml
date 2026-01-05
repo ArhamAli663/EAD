@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Mess Management System</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --secondary-color: #858796;
+            --success-color: #1cc88a;
+            --info-color: #36b9cc;
+            --warning-color: #f6c23e;
+            --danger-color: #e74a3b;
+            --sidebar-width: 250px;
+            
+            /* Light Mode Colors */
+            --bg-primary: #f8f9fc;
+            --bg-secondary: #ffffff;
+            --bg-hover: #f1f3f5;
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --text-muted: #a0aec0;
+            --border-color: #e2e8f0;
+            --card-shadow: rgba(0, 0, 0, 0.08);
+            --card-shadow-hover: rgba(0, 0, 0, 0.12);
+            --input-bg: #ffffff;
+            --input-border: #cbd5e0;
+            --table-stripe: #f7fafc;
+            --table-hover: #edf2f7;
+        }
+
+        [data-theme="dark"] {
+            /* Dark Mode Colors */
+            --bg-primary: #1a202c;
+            --bg-secondary: #2d3748;
+            --bg-hover: #374151;
+            --text-primary: #f7fafc;
+            --text-secondary: #cbd5e0;
+            --text-muted: #a0aec0;
+            --border-color: #4a5568;
+            --card-shadow: rgba(0, 0, 0, 0.4);
+            --card-shadow-hover: rgba(0, 0, 0, 0.6);
+            --input-bg: #374151;
+            --input-border: #4a5568;
+            --table-stripe: #374151;
+            --table-hover: #4a5568;
+        }
+
+        /* ==========================================
+           GLOBAL BOLD STYLES - ALL CONTENT VISIBLE
+           ========================================== */
+        
+        /* All headings extra bold */
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 800 !important;
+            color: var(--text-primary) !important;
+        }
+
+        /* All text elements bold */
+        p, span, div, label, td, th, li, a {
+            font-weight: 600 !important;
+            color: var(--text-primary) !important;
+        }
+
+        /* Links maintain color but bold */
+        a {
+            font-weight: 700 !important;
+        }
+
+        /* Button text bold */
+        .btn, button {
+            font-weight: 700 !important;
+        }
+
+        /* Form labels extra bold */
+        .form-label, label {
+            font-weight: 700 !important;
+            color: var(--text-primary) !important;
+        }
+
+        /* Table headers extra bold */
+        th, .table th {
+            font-weight: 800 !important;
+            color: var(--text-primary) !important;
+        }
+
+        /* Table cells bold */
+        td, .table td {
+            font-weight: 600 !important;
+            color: var(--text-primary) !important;
+        }
+
+        /* Strong and bold even bolder */
+        strong, b {
+            font-weight: 900 !important;
+        }
+
+        /* Card titles bold */
+        .card-title, .card-header {
+            font-weight: 800 !important;
+            color: var(--text-primary) !important;
+        }
+
+        /* Alert text bold */
+        .alert {
+            font-weight: 600 !important;
+        }
+
+        /* Badge text bold */
+        .badge {
+            font-weight: 700 !important;
+        }
+
+        /* Dropdown items bold */
+        .dropdown-item {
+            font-weight: 600 !important;
+            color: var(--text-primary) !important;
+        }
+
+        /* Nav links bold */
+        .nav-link {
+            font-weight: 600 !important;
+        }
+
+        /* Input placeholder visible */
+        .form-control::placeholder,
+        input::placeholder,
+        textarea::placeholder {
+            font-weight: 600 !important;
+            opacity: 0.7 !important;
+        }
+
+        /* Small text still bold */
+        small, .small {
+            font-weight: 600 !important;
+        }
+
+        /* Text muted still visible */
+        .text-muted {
+            font-weight: 600 !important;
+            color: var(--text-secondary) !important;
+        }
+
+        * {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, #11998e 10%, #0d7a6f 100%);
+            color: white;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar .brand {
+            padding: 1.5rem;
+            font-size: 1.3rem;
+            font-weight: 700;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 1rem 1.5rem;
+            border-left: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            color: white;
+            background-color: rgba(255,255,255,0.1);
+            border-left-color: white;
+        }
+
+        .sidebar .nav-link.active {
+            font-weight: 700;
+            background-color: rgba(255,255,255,0.15);
+        }
+
+        .sidebar .nav-link i {
+            margin-right: 0.5rem;
+            width: 20px;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 0;
+        }
+
+        .topbar {
+            background-color: var(--bg-secondary);
+            padding: 1rem 1.5rem;
+            box-shadow: 0 0.15rem 1.75rem 0 var(--card-shadow);
+            margin-bottom: 2rem;
+        }
+
+        .topbar h4 {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .page-title-badge {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .content-wrapper {
+            padding: 0 1.5rem 1.5rem;
+        }
+
+        .card {
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            box-shadow: 0 0.15rem 1.75rem 0 var(--card-shadow);
+            margin-bottom: 1.5rem;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 0.25rem 2rem 0 var(--card-shadow-hover);
+        }
+
+        .card-header {
+            background-color: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .card-body {
+            color: var(--text-primary);
+            background-color: var(--bg-secondary);
+        }
+
+        .stat-card {
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .stat-card.success {
+            border-left-color: var(--success-color);
+        }
+
+        .stat-card.info {
+            border-left-color: var(--info-color);
+        }
+
+        .stat-card.warning {
+            border-left-color: var(--warning-color);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #11998e;
+            border-color: #0d7a6f;
+        }
+
+        .table {
+            color: var(--text-primary);
+            background-color: var(--bg-secondary);
+        }
+
+        .table thead th {
+            border-bottom: 2px solid var(--border-color);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            color: var(--text-primary);
+            background-color: var(--table-stripe);
+        }
+
+        .table tbody td {
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .table tbody tr:nth-child(even) {
+            background-color: var(--table-stripe);
+        }
+
+        .table tbody tr:hover {
+            background-color: var(--table-hover);
+        }
+
+        .badge {
+            padding: 0.4rem 0.6rem;
+            font-weight: 600;
+        }
+
+        .notification-badge {
+            display: inline-block;
+            min-width: 20px;
+            padding: 3px 7px;
+            font-size: 11px;
+            font-weight: 700;
+            line-height: 1;
+            color: white;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+            background-color: #e74a3b;
+            border-radius: 10px;
+            margin-left: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @@keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .sidebar .nav-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sidebar .nav-link .link-text {
+            flex: 1;
+        }
+
+        .theme-toggle-btn {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 50px;
+            padding: 6px 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--card-shadow);
+        }
+
+        .theme-toggle-btn i {
+            font-size: 1rem;
+            color: var(--text-primary);
+        }
+
+        .dropdown-menu {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .dropdown-item {
+            color: var(--text-primary);
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--bg-primary);
+        }
+
+        /* Form Controls */
+        .form-control, .form-select {
+            background-color: var(--input-bg);
+            border: 1px solid var(--input-border);
+            color: var(--text-primary);
+        }
+
+        .form-control:focus, .form-select:focus {
+            background-color: var(--input-bg);
+            border-color: #11998e;
+            color: var(--text-primary);
+            box-shadow: 0 0 0 0.2rem rgba(17, 153, 142, 0.25);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-label {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .form-text {
+            color: var(--text-muted);
+        }
+
+        /* Input Groups */
+        .input-group-text {
+            background-color: var(--bg-hover);
+            border: 1px solid var(--input-border);
+            color: var(--text-secondary);
+        }
+
+        /* Buttons */
+        .btn-outline-primary {
+            color: #11998e;
+            border-color: #11998e;
+        }
+
+        .btn-outline-primary:hover {
+            background-color: #11998e;
+            border-color: #11998e;
+            color: white;
+        }
+
+        .btn-outline-success {
+            color: var(--success-color);
+            border-color: var(--success-color);
+        }
+
+        .btn-outline-success:hover {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-outline-secondary {
+            color: var(--text-secondary);
+            border-color: var(--border-color);
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: var(--bg-hover);
+            border-color: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        /* Text Colors */
+        .text-muted {
+            color: var(--text-muted) !important;
+        }
+
+        /* Links */
+        a:not(.btn):not(.nav-link):not(.dropdown-item) {
+            color: #11998e;
+            text-decoration: none;
+        }
+
+        a:not(.btn):not(.nav-link):not(.dropdown-item):hover {
+            color: #0d7a6f;
+            text-decoration: underline;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            background-color: transparent;
+        }
+
+        .breadcrumb-item {
+            color: var(--text-secondary);
+        }
+
+        .breadcrumb-item + .breadcrumb-item::before {
+            color: var(--text-muted);
+        }
+
+        .breadcrumb-item.active {
+            color: var(--text-primary);
+        }
+
+        /* Modal */
+        .modal-content {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-header {
+            background-color: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-title {
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            color: var(--text-primary);
+        }
+
+        .modal-footer {
+            background-color: var(--bg-primary);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn-close {
+            filter: var(--text-primary);
+        }
+
+        [data-theme="dark"] .btn-close {
+            filter: invert(1) grayscale(100%) brightness(200%);
+        }
+
+        .alert {
+            border: 1px solid var(--border-color);
+        }
+
+        .form-control, .form-select {
+            background-color: var(--bg-primary);
+            border-color: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .form-control:focus, .form-select:focus {
+            background-color: var(--bg-secondary);
+            border-color: var(--primary-color);
+            color: var(--text-primary);
+        }
+
+        .modal-content {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .modal-header {
+            border-bottom-color: var(--border-color);
+        }
+
+        .modal-footer {
+            border-top-color: var(--border-color);
+        }
+
+        @@media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    @inject MessManagementSystem.Data.ApplicationDbContext DbContext
+    @using System.Security.Claims
+    @using Microsoft.EntityFrameworkCore
+    
+    @{
+        var pendingDisputes = 0;
+        var unacknowledgedDisputes = 0;
+        
+        // Get current controller and action for active link detection
+        var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+        var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "0");
+
+            if (User.IsInRole("Admin"))
+            {
+                pendingDisputes = await DbContext.AttendanceDisputes.CountAsync(d => d.Status == "Pending");
+            }
+            else if (User.IsInRole("Teacher"))
+            {
+                unacknowledgedDisputes = await DbContext.AttendanceDisputes
+                    .CountAsync(d => d.TeacherId == userId && d.Status != "Pending" && !d.IsAcknowledgedByTeacher);
+            }
+        }
+    }
+    
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <div class="sidebar">
+            <div class="brand">
+                <i class="fas fa-utensils"></i> Mess Management
+            </div>
+            <nav class="nav flex-column">
+                @if (User.IsInRole("Admin"))
+                {
+                    <a class="nav-link @(currentController == "Admin" && currentAction == "Index" ? "active" : "")" asp-controller="Admin" asp-action="Index" title="View admin dashboard with statistics and overview">
+                        <span class="link-text"><i class="fas fa-tachometer-alt"></i> Dashboard</span>
+                    </a>
+                    <a class="nav-link @(currentController == "Admin" && currentAction == "ManageTeachers" ? "active" : "")" asp-controller="Admin" asp-action="ManageTeachers" title="Add, edit, or remove teachers">
+                        <span class="link-text"><i class="fas fa-users"></i> Manage Teachers</span>
+                    </a>
+                    <a class="nav-link @(currentController == "Attendance" ? "active" : "")" asp-controller="Attendance" asp-action="Index" title="Mark and view attendance records">
+                        <span class="link-text"><i class="fas fa-calendar-check"></i> Attendance</span>
+                    </a>
+                    <a class="nav-link @(currentController == "Admin" && currentAction == "ManageDisputes" ? "active" : "")" asp-controller="Admin" asp-action="ManageDisputes" title="Review and resolve teacher attendance disputes">
+                        <span class="link-text"><i class="fas fa-exclamation-triangle"></i> Manage Disputes</span>
+                        @if (pendingDisputes > 0)
+                        {
+                            <span class="notification-badge" title="@pendingDisputes pending disputes">@pendingDisputes</span>
+                        }
+                    </a>
+                    <a class="nav-link @(currentController == "Menu" ? "active" : "")" asp-controller="Menu" asp-action="Index" title="Set daily menu and meal prices">
+                        <span class="link-text"><i class="fas fa-clipboard-list"></i> Menu Management</span>
+                    </a>
+                    <a class="nav-link @(currentController == "Billing" && currentAction == "Index" ? "active" : "")" asp-controller="Billing" asp-action="Index" title="Generate and manage monthly bills">
+                        <span class="link-text"><i class="fas fa-file-invoice-dollar"></i> Billing</span>
+                    </a>
+                    <a class="nav-link @(currentController == "Billing" && currentAction == "Configuration" ? "active" : "")" asp-controller="Billing" asp-action="Configuration" title="Configure billing rates and system settings">
+                        <span class="link-text"><i class="fas fa-cog"></i> Configuration</span>
+                    </a>
+                }
+                else if (User.IsInRole("Teacher"))
+                {
+                    <a class="nav-link @(currentController == "Teachers" && currentAction == "Index" ? "active" : "")" asp-controller="Teachers" asp-action="Index" title="View your dashboard and summary">
+                        <span class="link-text"><i class="fas fa-tachometer-alt"></i> Dashboard</span>
+                    </a>
+                    <a class="nav-link @(currentController == "Teachers" && currentAction == "ViewAttendance" ? "active" : "")" asp-controller="Teachers" asp-action="ViewAttendance" title="Check your meal attendance history">
+                        <span class="link-text"><i class="fas fa-calendar-alt"></i> My Attendance</span>
+                    </a>
+                    <a class="nav-link @(currentController == "Teachers" && (currentAction == "ReportWrongAttendance" || currentAction == "VerifyAttendance") ? "active" : "")" asp-controller="Teachers" asp-action="ReportWrongAttendance" title="Report incorrect attendance records">
+                        <span class="link-text"><i class="fas fa-exclamation-triangle"></i> Report Issue</span>
+                    </a>
+                    <a class="nav-link @(currentController == "Teachers" && currentAction == "ViewDisputeHistory" ? "active" : "")" asp-controller="Teachers" asp-action="ViewDisputeHistory" title="View status of your reported issues">
+                        <span class="link-text"><i class="fas fa-history"></i> My Reports</span>
+                        @if (unacknowledgedDisputes > 0)
+                        {
+                            <span class="notification-badge" title="@unacknowledgedDisputes new updates">@unacknowledgedDisputes</span>
+                        }
+                    </a>
+                    <a class="nav-link @(currentController == "Teachers" && (currentAction == "ViewBills" || currentAction == "BillDetails") ? "active" : "")" asp-controller="Teachers" asp-action="ViewBills" title="View and pay your mess bills">
+                        <span class="link-text"><i class="fas fa-file-invoice"></i> My Bills</span>
+                    </a>
+                    <a class="nav-link @(currentController == "Menu" ? "active" : "")" asp-controller="Menu" asp-action="Index" title="Check daily menu schedule">
+                        <span class="link-text"><i class="fas fa-utensils"></i> Menu</span>
+                    </a>
+                    <a class="nav-link @(currentController == "Account" && currentAction == "ChangePassword" ? "active" : "")" asp-controller="Account" asp-action="ChangePassword" title="Update your account password">
+                        <span class="link-text"><i class="fas fa-key"></i> Change Password</span>
+                    </a>
+                }
+            </nav>
+        </div>
+
+        <div class="main-content">
+            <div class="topbar d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="mb-0">
+                        <i class="fas fa-map-marker-alt text-muted" style="font-size: 0.875rem;"></i>
+                        @ViewData["Title"]
+                        <span class="page-title-badge">Current Page</span>
+                    </h4>
+                </div>
+                <div class="d-flex align-items-center">
+                    <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Dark Mode">
+                        <i class="fas fa-moon" id="themeIcon"></i>
+                    </button>
+                    <div class="dropdown">
+                        <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user"></i> @User.Identity.Name
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" asp-controller="Account" asp-action="ChangePassword">Change Password</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="fas fa-sign-out-alt"></i> Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-wrapper">
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert" style="border-left: 5px solid #198754;">
+                        <i class="fas fa-check-circle me-2"></i> <strong>Success!</strong> @TempData["Success"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert" style="border-left: 5px solid #dc3545;">
+                        <i class="fas fa-exclamation-triangle me-2"></i> <strong>Error:</strong> @TempData["Error"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                @if (TempData["Info"] != null)
+                {
+                    <div class="alert alert-info alert-dismissible fade show shadow-sm" role="alert" style="border-left: 5px solid #0dcaf0;">
+                        <i class="fas fa-info-circle me-2"></i> <strong>Note:</strong> @TempData["Info"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                @RenderBody()
+            </div>
+        </div>
+    }
+    else
+    {
+        @RenderBody()
+    }
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Prevent multiple form submissions
+        document.addEventListener('DOMContentLoaded', function() {
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    if (submitBtn && !submitBtn.disabled) {
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                        
+                        // Re-enable after 3 seconds to prevent permanent disable
+                        setTimeout(() => {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = submitBtn.getAttribute('data-original-text') || 'Submit';
+                        }, 3000);
+                    }
+                });
+            });
+        });
+
+        // Dark mode functionality
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('themeIcon');
+            if (icon) {
+                if (theme === 'dark') {
+                    icon.className = 'fas fa-sun';
+                } else {
+                    icon.className = 'fas fa-moon';
+                }
+            }
+        }
+
+        // Load saved theme on page load
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+        })();
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

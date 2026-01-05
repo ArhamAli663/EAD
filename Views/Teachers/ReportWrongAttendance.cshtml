@@ -1,0 +1,288 @@
+@model IEnumerable<MessManagementSystem.Models.Attendance>
+
+@{
+    ViewData["Title"] = "Report Wrong Attendance";
+    var teacherName = ViewBag.TeacherName;
+    var selectedAttendanceId = ViewBag.SelectedAttendanceId as int?;
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-action="Index"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li class="breadcrumb-item active">Report Wrong Attendance</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card border-0 shadow-lg" style="animation: slideUp 0.5s ease-out;">
+        <div class="card-header text-white" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); border: none;">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="mb-1">
+                        <i class="fas fa-exclamation-triangle me-2"></i> Report Wrong Attendance
+                    </h4>
+                    <p class="mb-0 opacity-90"><i class="fas fa-shield-check me-1"></i> Help us maintain accurate records</p>
+                </div>
+                <div>
+                    <a asp-action="ViewDisputeHistory" class="btn btn-outline-info me-2">
+                        <i class="fas fa-history"></i> View Dispute History
+                    </a>
+                    <a asp-action="VerifyAttendance" class="btn btn-outline-secondary">
+                        <i class="fas fa-check-circle"></i> Verify Attendance
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-4">
+            <div class="alert alert-light border-start border-4 border-info">
+                <h6 class="text-info mb-3"><i class="fas fa-info-circle me-2"></i><strong>How to Report Issues</strong></h6>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-start mb-2">
+                            <span class="badge bg-info me-2">1</span>
+                            <div>
+                                <strong>Review Records</strong>
+                                <p class="mb-0 small text-muted">Check your meal attendance below</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-start mb-2">
+                            <span class="badge bg-info me-2">2</span>
+                            <div>
+                                <strong>Find Error</strong>
+                                <p class="mb-0 small text-muted">Spot incorrect entries</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-start mb-2">
+                            <span class="badge bg-info me-2">3</span>
+                            <div>
+                                <strong>Click Report</strong>
+                                <p class="mb-0 small text-muted">Admin will review & fix</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <style>
+                @@keyframes slideUp {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .table tbody tr {
+                    transition: all 0.3s ease;
+                }
+                .table tbody tr:hover {
+                    background: linear-gradient(90deg, rgba(17, 153, 142, 0.05) 0%, rgba(56, 239, 125, 0.05) 100%);
+                    transform: translateX(5px);
+                    box-shadow: -5px 0 0 #11998e;
+                }
+                .badge {
+                    transition: all 0.2s ease;
+                }
+                .btn:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                }
+            </style>
+
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 15%">Date</th>
+                                <th class="text-center" style="width: 20%">
+                                    <i class="fas fa-utensils text-success"></i> Lunch
+                                </th>
+                                <th class="text-center" style="width: 20%">
+                                    <i class="fas fa-moon text-info"></i> Dinner
+                                </th>
+                                <th style="width: 30%">Remarks</th>
+                                <th style="width: 15%">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var attendance in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@attendance.Date.ToString("MMM dd, yyyy")</strong>
+                                        <br />
+                                        <small class="text-muted">@attendance.Date.ToString("dddd")</small>
+                                    </td>
+                                    <td class="text-center">
+                                        @if (attendance.LunchTaken)
+                                        {
+                                            <span class="badge bg-success px-3 py-2">
+                                                <i class="fas fa-check"></i> Taken
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-light text-dark px-3 py-2">
+                                                <i class="fas fa-times"></i> Not Taken
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        @if (attendance.DinnerTaken)
+                                        {
+                                            <span class="badge bg-success px-3 py-2">
+                                                <i class="fas fa-check"></i> Taken
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-light text-dark px-3 py-2">
+                                                <i class="fas fa-times"></i> Not Taken
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(attendance.Remarks))
+                                        {
+                                            <small class="text-muted">@attendance.Remarks</small>
+                                        }
+                                        else
+                                        {
+                                            <small class="text-muted">-</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (attendance.Remarks != null && attendance.Remarks.Contains("[REPORTED BY TEACHER]"))
+                                        {
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="fas fa-clock"></i> Already Reported
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <button type="button" class="btn btn-warning btn-sm" 
+                                                    onclick="openReportModal(@attendance.AttendanceId, '@attendance.Date.ToString("MMM dd, yyyy")', @attendance.LunchTaken.ToString().ToLower(), @attendance.DinnerTaken.ToString().ToLower())"
+                                                    data-bs-toggle="modal" data-bs-target="#reportModal">
+                                                <i class="fas fa-flag"></i> Report Issue
+                                            </button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="fas fa-calendar-times fa-3x mb-3"></i>
+                    <h5>No Attendance Records Found</h5>
+                    <p>No attendance records found for the last 30 days.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Report Modal -->
+<div class="modal fade" id="reportModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle"></i> Report Attendance Issue
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="ReportWrongAttendance" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <input type="hidden" name="attendanceId" id="attendanceId" />
+                    
+                    <div class="alert alert-light border">
+                        <h6 class="mb-2"><strong>Date:</strong> <span id="reportDate"></span></h6>
+                        <div class="row mt-3">
+                            <div class="col-6">
+                                <small class="text-muted">Lunch:</small><br />
+                                <span id="reportLunch"></span>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Dinner:</small><br />
+                                <span id="reportDinner"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="reason" class="form-label fw-bold">
+                            <i class="fas fa-comment"></i> Describe the Issue
+                        </label>
+                        <textarea class="form-control" id="reason" name="reason" rows="4" 
+                                  placeholder="Please describe what's wrong with this attendance record. For example: 'I didn't take breakfast that day' or 'I took lunch but it's not marked'"
+                                  required></textarea>
+                        <small class="text-muted">Be specific so the admin can correct the issue accurately.</small>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <small>
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Note:</strong> Your report will be sent to the admin for review. They will investigate and make necessary corrections to your attendance record.
+                        </small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-paper-plane"></i> Submit Report
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function openReportModal(attendanceId, date, lunch, dinner) {
+            document.getElementById('attendanceId').value = attendanceId;
+            document.getElementById('reportDate').textContent = date;
+            
+            // Set meal status
+            document.getElementById('reportLunch').innerHTML = lunch ? 
+                '<span class="badge bg-success"><i class="fas fa-check"></i> Taken</span>' : 
+                '<span class="badge bg-secondary"><i class="fas fa-times"></i> Not Taken</span>';
+            
+            document.getElementById('reportDinner').innerHTML = dinner ? 
+                '<span class="badge bg-success"><i class="fas fa-check"></i> Taken</span>' : 
+                '<span class="badge bg-secondary"><i class="fas fa-times"></i> Not Taken</span>';
+            
+            // Clear previous reason
+            document.getElementById('reason').value = '';
+        }
+    </script>
+}

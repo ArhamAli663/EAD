@@ -1,0 +1,440 @@
+@model MessManagementSystem.Models.Teacher
+
+@{
+    ViewData["Title"] = "Teacher Details";
+}
+
+<style>
+    .teacher-details-container {
+        padding: 2rem 0;
+        min-height: 100vh;
+    }
+
+    .back-button {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        border: none;
+        padding: 12px 24px;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        color: white;
+        box-shadow: 0 5px 15px rgba(17, 153, 142, 0.3);
+    }
+
+    .back-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(17, 153, 142, 0.4);
+        color: white;
+    }
+
+    .profile-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+        overflow: hidden;
+        animation: slideUp 0.6s ease-out;
+    }
+
+    .profile-card .card-header {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        padding: 2.5rem 1.5rem 2rem;
+        text-align: center;
+        border: none;
+    }
+
+    .profile-icon {
+        font-size: 5rem;
+        margin-bottom: 1rem;
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    @@keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    .profile-card .card-header h4 {
+        margin: 0;
+        font-weight: 700;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .info-table {
+        margin: 0;
+    }
+
+    .info-table tr {
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .info-table tr:last-child {
+        border-bottom: none;
+    }
+
+    .info-table td {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+
+    .info-table td:first-child {
+        font-weight: 600;
+        color: #495057;
+        width: 40%;
+    }
+
+    .info-icon {
+        font-size: 1.2rem;
+        margin-right: 0.5rem;
+    }
+
+    .edit-profile-btn {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        border: none;
+        padding: 12px;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        color: white;
+    }
+
+    .edit-profile-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(17, 153, 142, 0.4);
+        color: white;
+    }
+
+    .data-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+        overflow: hidden;
+        margin-bottom: 2rem;
+        animation: slideUp 0.6s ease-out 0.2s both;
+    }
+
+    .data-card .card-header {
+        padding: 1.5rem;
+        font-weight: 700;
+        border: none;
+    }
+
+    .attendance-header {
+        background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+        color: #155724;
+    }
+
+    .billing-header {
+        background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+        color: #856404;
+    }
+
+    .data-table {
+        margin: 0;
+    }
+
+    .data-table thead {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+
+    .data-table thead th {
+        font-weight: 600;
+        padding: 1rem;
+        border: none;
+        color: #495057;
+    }
+
+    .data-table tbody tr {
+        transition: all 0.3s ease;
+    }
+
+    .data-table tbody tr:hover {
+        background: linear-gradient(90deg, rgba(17, 153, 142, 0.05) 0%, rgba(56, 239, 125, 0.05) 100%);
+        transform: scale(1.01);
+    }
+
+    .data-table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+
+    .meal-badge {
+        padding: 6px 14px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+
+    .status-badge {
+        padding: 8px 16px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+
+    .empty-info {
+        padding: 3rem 2rem;
+        text-align: center;
+        color: #6c757d;
+    }
+
+    .empty-info i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .badge-gradient {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+    }
+</style>
+
+<div class="container-fluid teacher-details-container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <a asp-action="ManageTeachers" class="btn back-button">
+                <i class="fas fa-arrow-left me-2"></i>Back to Teachers List
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Teacher Profile Card -->
+        <div class="col-lg-4 mb-4">
+            <div class="card profile-card">
+                <div class="card-header">
+                    <i class="fas fa-user-circle profile-icon"></i>
+                    <h4>@Model.FullName</h4>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table info-table">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <i class="fas fa-envelope text-primary info-icon"></i>
+                                    <strong>Email:</strong>
+                                </td>
+                                <td><a href="mailto:@Model.Email" class="text-decoration-none">@Model.Email</a></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <i class="fas fa-phone text-success info-icon"></i>
+                                    <strong>Phone:</strong>
+                                </td>
+                                <td>@Model.PhoneNumber</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <i class="fas fa-building text-info info-icon"></i>
+                                    <strong>Department:</strong>
+                                </td>
+                                <td><span class="badge-gradient">@Model.Department</span></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <i class="fas fa-calendar text-warning info-icon"></i>
+                                    <strong>Joined:</strong>
+                                </td>
+                                <td>@Model.JoiningDate.ToString("MMM dd, yyyy")</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <i class="fas fa-toggle-on text-success info-icon"></i>
+                                    <strong>Status:</strong>
+                                </td>
+                                <td>
+                                    @if (Model.IsActive)
+                                    {
+                                        <span class="badge bg-success status-badge">
+                                            <i class="fas fa-check-circle me-1"></i>Active
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger status-badge">
+                                            <i class="fas fa-ban me-1"></i>Inactive
+                                        </span>
+                                    }
+                                </td>
+                            </tr>
+                            @if (Model.User != null)
+                            {
+                                <tr>
+                                    <td>
+                                        <i class="fas fa-user-tag text-secondary info-icon"></i>
+                                        <strong>Username:</strong>
+                                    </td>
+                                    <td><code class="text-primary">@Model.User.Username</code></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                    <div class="p-4">
+                        <div class="d-grid">
+                            <a asp-action="EditTeacher" asp-route-id="@Model.TeacherId" class="btn edit-profile-btn">
+                                <i class="fas fa-edit me-2"></i>Edit Profile
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance Summary -->
+        <div class="col-lg-8 mb-4">
+            <div class="card data-card">
+                <div class="card-header attendance-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-check me-2"></i>Recent Attendance (Last 30 Days)
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.Attendances != null && Model.Attendances.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table data-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th><i class="fas fa-calendar-day me-2"></i>Date</th>
+                                        <th><i class="fas fa-utensils me-2"></i>Lunch</th>
+                                        <th><i class="fas fa-moon me-2"></i>Dinner</th>
+                                        <th><i class="fas fa-comment me-2"></i>Remarks</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var attendance in Model.Attendances)
+                                    {
+                                        <tr>
+                                            <td><strong>@attendance.Date.ToString("MMM dd, yyyy")</strong></td>
+                                            <td>
+                                                @if (attendance.LunchTaken)
+                                                {
+                                                    <span class="badge bg-success meal-badge">
+                                                        <i class="fas fa-check me-1"></i>Yes
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary meal-badge">
+                                                        <i class="fas fa-times me-1"></i>No
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (attendance.DinnerTaken)
+                                                {
+                                                    <span class="badge bg-success meal-badge">
+                                                        <i class="fas fa-check me-1"></i>Yes
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary meal-badge">
+                                                        <i class="fas fa-times me-1"></i>No
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td>@(string.IsNullOrEmpty(attendance.Remarks) ? "—" : attendance.Remarks)</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-info">
+                            <i class="fas fa-calendar-times"></i>
+                            <p class="mb-0">No attendance records found for this teacher.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Billing Summary -->
+            <div class="card data-card">
+                <div class="card-header billing-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-file-invoice-dollar me-2"></i>Recent Bills
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.Bills != null && Model.Bills.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table data-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th><i class="fas fa-calendar me-2"></i>Month/Year</th>
+                                        <th><i class="fas fa-rupee-sign me-2"></i>Food Bill</th>
+                                        <th><i class="fas fa-tint me-2"></i>Water Bill</th>
+                                        <th><i class="fas fa-calculator me-2"></i>Total</th>
+                                        <th><i class="fas fa-utensils me-2"></i>Meals</th>
+                                        <th><i class="fas fa-info-circle me-2"></i>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var bill in Model.Bills)
+                                    {
+                                        <tr>
+                                            <td><strong>@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(bill.Month) @bill.Year</strong></td>
+                                            <td>Rs. @bill.FoodBill.ToString("N2")</td>
+                                            <td>Rs. @bill.WaterBill.ToString("N2")</td>
+                                            <td><strong class="text-primary">Rs. @bill.TotalBill.ToString("N2")</strong></td>
+                                            <td>
+                                                <span class="badge bg-info">
+                                                    @bill.TotalMealsConsumed <i class="fas fa-utensils ms-1"></i>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @if (bill.IsPaid)
+                                                {
+                                                    <span class="badge bg-success status-badge">
+                                                        <i class="fas fa-check-circle me-1"></i>Paid
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger status-badge">
+                                                        <i class="fas fa-exclamation-circle me-1"></i>Unpaid
+                                                    </span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-info">
+                            <i class="fas fa-file-invoice"></i>
+                            <p class="mb-0">No billing records found for this teacher.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

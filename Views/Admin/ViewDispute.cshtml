@@ -1,0 +1,198 @@
+@model MessManagementSystem.Models.AttendanceDispute
+
+@{
+    ViewData["Title"] = "Dispute Details";
+    var config = ViewBag.BillingConfig as MessManagementSystem.Models.BillingConfiguration;
+}
+
+<div class="container mt-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Dashboard</a></li>
+            <li class="breadcrumb-item"><a asp-action="ManageDisputes">Disputes</a></li>
+            <li class="breadcrumb-item active">Dispute #@Model.DisputeId</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2><i class="fas fa-file-alt text-info me-2"></i>Dispute Details #@Model.DisputeId</h2>
+            <p class="text-muted">Detailed information about this attendance dispute</p>
+        </div>
+        <a asp-action="ManageDisputes" asp-route-status="@Model.Status" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Back to List
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Main Details Card -->
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Dispute Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong><i class="fas fa-hashtag me-2"></i>Dispute ID:</strong></p>
+                            <p class="text-muted">#@Model.DisputeId</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong><i class="fas fa-calendar me-2"></i>Reported On:</strong></p>
+                            <p class="text-muted">@Model.ReportedDate.ToString("MMMM dd, yyyy hh:mm tt")</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong><i class="fas fa-user-tie me-2"></i>Teacher:</strong></p>
+                            <p class="text-muted">@Model.Teacher?.FullName</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong><i class="fas fa-flag me-2"></i>Status:</strong></p>
+                            <p>
+                                @if (Model.Status == "Pending")
+                                {
+                                    <span class="badge bg-warning text-dark px-3 py-2">
+                                        <i class="fas fa-clock me-1"></i>Pending
+                                    </span>
+                                }
+                                else if (Model.Status == "Approved")
+                                {
+                                    <span class="badge bg-success px-3 py-2">
+                                        <i class="fas fa-check-circle me-1"></i>Approved
+                                    </span>
+                                }
+                                else if (Model.Status == "Rejected")
+                                {
+                                    <span class="badge bg-danger px-3 py-2">
+                                        <i class="fas fa-times-circle me-1"></i>Rejected
+                                    </span>
+                                }
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <div class="mb-3">
+                        <p class="mb-2"><strong><i class="fas fa-comment-dots me-2"></i>Teacher's Reason:</strong></p>
+                        <div class="alert alert-light">
+                            <p class="mb-0">@Model.Reason</p>
+                        </div>
+                    </div>
+
+                    @if (Model.Status != "Pending")
+                    {
+                        <hr />
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <p class="mb-2"><strong><i class="fas fa-user-shield me-2"></i>Resolved By:</strong></p>
+                                <p class="text-muted">@Model.ResolvedByUser?.Username</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-2"><strong><i class="fas fa-calendar-check me-2"></i>Resolved On:</strong></p>
+                                <p class="text-muted">@Model.ResolvedDate?.ToString("MMMM dd, yyyy hh:mm tt")</p>
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.AdminNotes))
+                        {
+                            <div class="mb-3">
+                                <p class="mb-2"><strong><i class="fas fa-sticky-note me-2"></i>Admin Notes:</strong></p>
+                                <div class="alert alert-info">
+                                    <p class="mb-0">@Model.AdminNotes</p>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance Details Card -->
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-clipboard-check me-2"></i>Attendance Record</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Attendance != null)
+                    {
+                        <p class="mb-2"><strong><i class="fas fa-calendar-day me-2"></i>Date:</strong></p>
+                        <p class="text-muted mb-3">@Model.Attendance.Date.ToString("MMMM dd, yyyy")</p>
+
+                        <p class="mb-2"><strong><i class="fas fa-utensils me-2"></i>Meals Marked:</strong></p>
+                        <div class="mb-3">
+                            @if (Model.Attendance.LunchTaken)
+                            {
+                                <span class="badge bg-success d-block mb-2 py-2">
+                                    <i class="fas fa-utensils me-1"></i>Lunch
+                                    @if (config != null)
+                                    {
+                                        <span class="float-end">Rs. @config.DefaultLunchRate</span>
+                                    }
+                                </span>
+                            }
+                            @if (Model.Attendance.DinnerTaken)
+                            {
+                                <span class="badge bg-info d-block mb-2 py-2">
+                                    <i class="fas fa-moon me-1"></i>Dinner
+                                    @if (config != null)
+                                    {
+                                        <span class="float-end">Rs. @config.DefaultDinnerRate</span>
+                                    }
+                                </span>
+                            }
+                            @if (!Model.Attendance.LunchTaken && !Model.Attendance.DinnerTaken)
+                            {
+                                <p class="text-muted">No meals marked</p>
+                            }
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Attendance.Remarks))
+                        {
+                            <p class="mb-2"><strong><i class="fas fa-comment me-2"></i>Remarks:</strong></p>
+                            <p class="text-muted small">@Model.Attendance.Remarks</p>
+                        }
+
+                        @if (Model.Status == "Approved")
+                        {
+                            <div class="alert alert-success mt-3">
+                                <i class="fas fa-check-circle me-2"></i>
+                                <small>This attendance record has been removed</small>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted">Attendance record not found</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Impact Card (only show for approved) -->
+            @if (Model.Status == "Approved" && config != null && Model.Attendance != null)
+            {
+                <div class="card shadow-sm">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-calculator me-2"></i>Bill Impact</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-2"><strong>Deduction Applied:</strong></p>
+                        @{
+                            decimal totalDeduction = 0;
+                            if (Model.Attendance.LunchTaken) totalDeduction += config.DefaultLunchRate;
+                            if (Model.Attendance.DinnerTaken) totalDeduction += config.DefaultDinnerRate;
+                        }
+                        <h4 class="text-success">Rs. @totalDeduction.ToString("N2")</h4>
+                        <small class="text-muted">Amount deducted from teacher's bill</small>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

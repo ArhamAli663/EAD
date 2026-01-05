@@ -1,0 +1,600 @@
+@model IEnumerable<MessManagementSystem.Models.AttendanceDispute>
+
+@{
+    ViewData["Title"] = "Manage Attendance Disputes";
+    var currentStatus = ViewBag.CurrentStatus as string ?? "Pending";
+}
+
+<style>
+    .disputes-container {
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .page-header-disputes {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        padding: 2.5rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 40px rgba(17, 153, 142, 0.3);
+        animation: slideDown 0.5s ease;
+    }
+
+    .page-header-disputes h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+
+    .page-header-disputes p {
+        margin: 0.5rem 0 0 0;
+        opacity: 0.95;
+        font-size: 1.1rem;
+    }
+
+    .breadcrumb {
+        background: transparent;
+        padding: 0.5rem 0;
+        margin-bottom: 1rem;
+    }
+
+    .breadcrumb-item a {
+        color: #11998e;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .breadcrumb-item a:hover {
+        color: #38ef7d;
+        transform: translateX(3px);
+    }
+
+    .disputes-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        margin-bottom: 2rem;
+        animation: fadeIn 0.6s ease;
+    }
+
+    .nav-tabs {
+        border: none;
+        background: #f8f9fa;
+        padding: 0.5rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .nav-tabs .nav-link {
+        border: none;
+        color: #6c757d;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        margin: 0 0.25rem;
+    }
+
+    .nav-tabs .nav-link:hover {
+        background: rgba(17, 153, 142, 0.1);
+        color: #11998e;
+        transform: translateY(-2px);
+    }
+
+    .nav-tabs .nav-link.active {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white !important;
+        box-shadow: 0 5px 15px rgba(17, 153, 142, 0.4);
+    }
+
+    .disputes-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .disputes-table thead th {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        font-weight: 600;
+        padding: 1.2rem 1rem;
+        border: none;
+        text-align: left;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+    }
+
+    .disputes-table thead th:first-child {
+        border-top-left-radius: 12px;
+    }
+
+    .disputes-table thead th:last-child {
+        border-top-right-radius: 12px;
+    }
+
+    .disputes-table tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #f0f0f0;
+        animation: slideUp 0.4s ease;
+    }
+
+    .disputes-table tbody tr:hover {
+        background: linear-gradient(to right, rgba(17, 153, 142, 0.05), rgba(56, 239, 125, 0.05));
+        transform: scale(1.01);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .disputes-table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        font-size: 0.95rem;
+    }
+
+    .meal-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-right: 0.3rem;
+        transition: all 0.3s ease;
+    }
+
+    .meal-badge:hover {
+        transform: scale(1.1);
+    }
+
+    .badge-lunch {
+        background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+        color: #155724;
+    }
+
+    .badge-dinner {
+        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        color: #004085;
+    }
+
+    .action-btn {
+        padding: 0.4rem 1rem;
+        font-size: 0.85rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        text-decoration: none;
+        margin-right: 0.3rem;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-resolve {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+    }
+
+    .btn-view {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        animation: pulse 2s ease infinite;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: #e0e0e0;
+        margin-bottom: 1rem;
+    }
+
+    .alert {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-content {
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        border-radius: 20px 20px 0 0;
+        padding: 1.5rem 2rem;
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .modal-footer {
+        border-top: 1px solid #f0f0f0;
+        padding: 1.5rem 2rem;
+    }
+
+    .modal .btn {
+        padding: 0.6rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .modal .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    @@keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    @@keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.6;
+        }
+    }
+</style>
+
+<div class="container-fluid disputes-container">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Dashboard</a></li>
+            <li class="breadcrumb-item active">Manage Disputes</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="page-header-disputes">
+        <h2><i class="fas fa-exclamation-triangle"></i>Attendance Disputes</h2>
+        <p>Review and resolve attendance disputes reported by teachers</p>
+    </div>
+
+    <!-- Help Instructions -->
+    <div class="alert alert-info shadow-sm mb-4" style="border-left: 5px solid #0dcaf0;">
+        <h6 class="mb-2"><i class="fas fa-lightbulb me-2"></i><strong>How to Resolve Disputes:</strong></h6>
+        <div class="small">
+            <strong>Step 1:</strong> Click on the "Pending" tab to see unresolved disputes<br>
+            <strong>Step 2:</strong> Click "Resolve" button for a dispute to open the resolution dialog<br>
+            <strong>Step 3:</strong> Check the boxes for meals to remove (if marked incorrectly)<br>
+            <strong>Step 4:</strong> Enter your response message explaining the decision<br>
+            <strong>Step 5:</strong> Click "Approve & Remove Meals" or "Reject Dispute" based on your review
+        </div>
+    </div>
+
+    <!-- Alerts -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Status Filter Tabs -->
+    <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+            <a class="nav-link @(currentStatus == "Pending" ? "active" : "")" 
+               asp-action="ManageDisputes" asp-route-status="Pending">
+                <i class="fas fa-clock me-1"></i>Pending
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(currentStatus == "Approved" ? "active" : "")" 
+               asp-action="ManageDisputes" asp-route-status="Approved">
+                <i class="fas fa-check me-1"></i>Approved
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(currentStatus == "Rejected" ? "active" : "")" 
+               asp-action="ManageDisputes" asp-route-status="Rejected">
+                <i class="fas fa-times me-1"></i>Rejected
+            </a>
+        </li>
+    </ul>
+
+    <!-- Disputes Table -->
+    <div class="disputes-card">
+        <div class="card-body">
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No @currentStatus.ToLower() disputes found</h5>
+                    <p class="text-muted">All disputes have been processed or none have been reported yet.</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="disputes-table">
+                        <thead>
+                            <tr>
+                                <th>Dispute ID</th>
+                                <th>Teacher</th>
+                                <th>Attendance Date</th>
+                                <th>Meals</th>
+                                <th>Reason</th>
+                                @if (currentStatus != "Pending")
+                                {
+                                    <th>Resolved By</th>
+                                    <th>Resolved On</th>
+                                }
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var dispute in Model)
+                            {
+                                <tr>
+                                    <td><strong>#@dispute.DisputeId</strong></td>
+                                    <td>
+                                        <i class="fas fa-user-tie me-1"></i>@dispute.Teacher?.FullName
+                                    </td>
+                                    <td>
+                                        @dispute.Attendance?.Date.ToString("MMM dd, yyyy")
+                                    </td>
+                                    <td>
+                                        @if (dispute.Attendance?.LunchTaken == true)
+                                        {
+                                            <span class="meal-badge badge-lunch">
+                                                <i class="fas fa-utensils"></i> Lunch
+                                            </span>
+                                        }
+                                        @if (dispute.Attendance?.DinnerTaken == true)
+                                        {
+                                            <span class="meal-badge badge-dinner">
+                                                <i class="fas fa-moon"></i> Dinner
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <small>@(dispute.Reason?.Length > 50 ? dispute.Reason.Substring(0, 50) + "..." : dispute.Reason)</small>
+                                    </td>
+                                    @if (currentStatus != "Pending")
+                                    {
+                                        <td>
+                                            @if (dispute.ResolvedByUser != null)
+                                            {
+                                                <i class="fas fa-user-shield me-1"></i>@dispute.ResolvedByUser.Username
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (dispute.ResolvedDate.HasValue)
+                                            {
+                                                <small>@dispute.ResolvedDate.Value.ToString("MMM dd, yyyy hh:mm tt")</small>
+                                            }
+                                        </td>
+                                    }
+                                    <td>
+                                        @if (currentStatus == "Pending")
+                                        {
+                                            <button type="button" class="action-btn btn-resolve" 
+                                                    onclick="openResolveModal(@dispute.DisputeId, '@dispute.Teacher?.FullName', '@dispute.Attendance?.Date.ToString("MMM dd, yyyy")', '', '@(dispute.Attendance?.LunchTaken == true ? "Lunch" : "")', '@(dispute.Attendance?.DinnerTaken == true ? "Dinner" : "")', '@dispute.Reason?.Replace("'", "\\'" ).Replace("\n", " ")')">
+                                                <i class="fas fa-gavel"></i>Resolve
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <a asp-action="ViewDispute" asp-route-id="@dispute.DisputeId" class="action-btn btn-view">
+                                                <i class="fas fa-eye"></i>View
+                                            </a>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Resolve Dispute Modal -->
+<div class="modal fade" id="resolveModal" tabindex="-1" aria-labelledby="resolveModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form asp-action="ResolveDispute" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="disputeId" id="modalDisputeId" />
+                
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title" id="resolveModalLabel">
+                        <i class="fas fa-gavel me-2"></i>Resolve Attendance Dispute
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle me-2"></i>Dispute Details</h6>
+                        <p class="mb-1"><strong>Teacher:</strong> <span id="modalTeacher"></span></p>
+                        <p class="mb-1"><strong>Date:</strong> <span id="modalDate"></span></p>
+                        <p class="mb-1"><strong>Meals Marked:</strong> <span id="modalMeals"></span></p>
+                        <p class="mb-0"><strong>Reason:</strong> <span id="modalReason"></span></p>
+                    </div>
+
+                    <div id="approveOptions" style="display: none;">
+                        <div class="alert alert-warning">
+                            <h6><i class="fas fa-exclamation-triangle me-2"></i><strong>Select Meals to Remove</strong></h6>
+                            <p class="mb-2"><strong>Check the box(es) for meals you want to remove from this attendance record:</strong></p>
+                            
+                            <div id="mealCheckboxes">
+                                <div class="form-check mb-2" id="lunchOption" style="display: none;">
+                                    <input class="form-check-input" type="checkbox" name="removeLunch" value="true" id="removeLunch">
+                                    <label class="form-check-label" for="removeLunch">
+                                        <i class="fas fa-utensils text-success"></i> <strong>Remove Lunch</strong>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2" id="dinnerOption" style="display: none;">
+                                    <input class="form-check-input" type="checkbox" name="removeDinner" value="true" id="removeDinner">
+                                    <label class="form-check-label" for="removeDinner">
+                                        <i class="fas fa-moon text-info"></i> <strong>Remove Dinner</strong>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle"></i> Bill will be adjusted based on selected meals. 
+                                If all meals are removed, the entire attendance record will be deleted.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="adminNotes" class="form-label">Admin Notes (Optional)</label>
+                        <textarea class="form-control" id="adminNotes" name="adminNotes" rows="3" 
+                                  placeholder="Add any notes or explanation for your decision..."></textarea>
+                        <small class="text-muted">This message will be sent to the teacher.</small>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Cancel
+                    </button>
+                    <button type="submit" name="action" value="Reject" class="btn btn-danger">
+                        <i class="fas fa-times-circle me-1"></i>Reject Dispute
+                    </button>
+                    <button type="submit" name="action" value="Approve" class="btn btn-success" id="approveBtn">
+                        <i class="fas fa-check-circle me-1"></i>Approve & Remove Selected Meals
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let hasLunch = false;
+        let hasDinner = false;
+
+        function openResolveModal(disputeId, teacher, date, breakfast, lunch, dinner, reason) {
+            document.getElementById('modalDisputeId').value = disputeId;
+            document.getElementById('modalTeacher').textContent = teacher;
+            document.getElementById('modalDate').textContent = date;
+            
+            // Store meal availability
+            hasLunch = lunch !== '';
+            hasDinner = dinner !== '';
+            
+            // Build meals string
+            let meals = [];
+            if (lunch) meals.push(lunch);
+            if (dinner) meals.push(dinner);
+            document.getElementById('modalMeals').textContent = meals.join(', ') || 'None';
+            
+            document.getElementById('modalReason').textContent = reason;
+            
+            // Show/hide meal checkboxes and reset them
+            const lunchCheckbox = document.getElementById('removeLunch');
+            const dinnerCheckbox = document.getElementById('removeDinner');
+            
+            if (hasLunch) {
+                document.getElementById('lunchOption').style.display = 'block';
+                lunchCheckbox.checked = false; // Don't auto-check
+                lunchCheckbox.disabled = false;
+            } else {
+                document.getElementById('lunchOption').style.display = 'none';
+                lunchCheckbox.checked = false;
+                lunchCheckbox.disabled = true;
+            }
+            
+            if (hasDinner) {
+                document.getElementById('dinnerOption').style.display = 'block';
+                dinnerCheckbox.checked = false; // Don't auto-check
+                dinnerCheckbox.disabled = false;
+            } else {
+                document.getElementById('dinnerOption').style.display = 'none';
+                dinnerCheckbox.checked = false;
+                dinnerCheckbox.disabled = true;
+            }
+            
+            // Show approve options by default
+            document.getElementById('approveOptions').style.display = 'block';
+            
+            var modal = new bootstrap.Modal(document.getElementById('resolveModal'));
+            modal.show();
+        }
+
+        // Add form validation for approval
+        document.getElementById('resolveModal').querySelector('form').addEventListener('submit', function(e) {
+            if (e.submitter && e.submitter.value === 'Approve') {
+                const lunchCheckbox = document.getElementById('removeLunch');
+                const dinnerCheckbox = document.getElementById('removeDinner');
+                
+                const lunchChecked = !lunchCheckbox.disabled && lunchCheckbox.checked;
+                const dinnerChecked = !dinnerCheckbox.disabled && dinnerCheckbox.checked;
+                
+                // Debug logging
+                console.log('Form Submit - Lunch: checked=' + lunchCheckbox.checked + ', disabled=' + lunchCheckbox.disabled + ', will submit=' + lunchChecked);
+                console.log('Form Submit - Dinner: checked=' + dinnerCheckbox.checked + ', disabled=' + dinnerCheckbox.disabled + ', will submit=' + dinnerChecked);
+                
+                if (!lunchChecked && !dinnerChecked) {
+                    e.preventDefault();
+                    alert('⚠️ Please select at least one meal to remove before approving.');
+                    return false;
+                }
+            }
+        });
+    </script>
+}

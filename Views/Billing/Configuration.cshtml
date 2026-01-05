@@ -1,0 +1,686 @@
+@model (BillingConfiguration config, List<MenuItem> menuItems)
+
+@{
+    ViewData["Title"] = "Billing Configuration";
+}
+
+<style>
+    .config-container {
+        min-height: 100vh;
+        padding: 2rem 0;
+        background: linear-gradient(135deg, rgba(17, 153, 142, 0.02), rgba(56, 239, 125, 0.02));
+    }
+
+    .page-header-config {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        padding: 2.5rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 40px rgba(17, 153, 142, 0.3);
+        animation: slideDown 0.5s ease;
+    }
+
+    .page-header-config h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+
+    .nav-tabs-custom {
+        border: none;
+        margin-bottom: 2rem;
+    }
+
+    .nav-tabs-custom .nav-link {
+        background: transparent;
+        border: none;
+        color: #11998e;
+        font-weight: 600;
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        margin-right: 0.5rem;
+    }
+
+    .nav-tabs-custom .nav-link:hover {
+        background: rgba(17, 153, 142, 0.1);
+        color: #11998e;
+    }
+
+    .nav-tabs-custom .nav-link.active {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(17, 153, 142, 0.3);
+    }
+
+    .page-header-config p {
+        margin: 0.5rem 0 0 0;
+        opacity: 0.95;
+        font-size: 1.05rem;
+    }
+
+    .config-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        animation: fadeIn 0.6s ease;
+        border: 1px solid rgba(17, 153, 142, 0.1);
+    }
+
+    .config-card .card-header {
+        background: linear-gradient(135deg, rgba(17, 153, 142, 0.1), rgba(56, 239, 125, 0.1));
+        border-bottom: 3px solid #11998e;
+        font-weight: 600;
+        font-size: 1.3rem;
+        padding: 1.5rem 2rem;
+        color: #11998e;
+    }
+
+    .config-card .card-body {
+        padding: 2.5rem;
+    }
+
+    .section-header {
+        background: linear-gradient(135deg, rgba(17, 153, 142, 0.08), rgba(56, 239, 125, 0.08));
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid #11998e;
+    }
+
+    .section-header h5 {
+        margin: 0;
+        color: #11998e;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-control {
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        padding: 0.9rem;
+        font-size: 1.05rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: #11998e;
+        box-shadow: 0 0 0 0.25rem rgba(17, 153, 142, 0.15);
+        transform: scale(1.02);
+    }
+
+    .menu-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 0.5rem;
+    }
+
+    .menu-table thead th {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        padding: 1rem;
+        font-weight: 600;
+        text-align: left;
+        border: none;
+    }
+
+    .menu-table thead th:first-child {
+        border-radius: 12px 0 0 12px;
+    }
+
+    .menu-table thead th:last-child {
+        border-radius: 0 12px 12px 0;
+    }
+
+    .menu-table tbody tr {
+        background: white;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    .menu-table tbody tr:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(17, 153, 142, 0.2);
+    }
+
+    .menu-table tbody td {
+        padding: 1rem;
+        border: none;
+        vertical-align: middle;
+    }
+
+    .menu-table tbody tr td:first-child {
+        border-radius: 12px 0 0 12px;
+    }
+
+    .menu-table tbody tr td:last-child {
+        border-radius: 0 12px 12px 0;
+    }
+
+    .day-badge {
+        display: inline-block;
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+    }
+
+    .meal-badge {
+        display: inline-block;
+        padding: 0.3rem 0.8rem;
+        border-radius: 15px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .meal-breakfast {
+        background: #ffeaa7;
+        color: #d63031;
+    }
+
+    .meal-lunch {
+        background: #74b9ff;
+        color: #0984e3;
+    }
+
+    .meal-dinner {
+        background: #a29bfe;
+        color: #6c5ce7;
+    }
+
+    .rate-badge {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #27ae60;
+    }
+
+    .modal-content {
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        border-radius: 20px 20px 0 0;
+        padding: 1.5rem 2rem;
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .input-group-lg .input-group-text {
+        border: 2px solid #e0e0e0;
+        border-radius: 12px 0 0 12px;
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        font-weight: 700;
+        font-size: 1.4rem;
+        padding: 1rem 1.5rem;
+    }
+
+    .input-group-lg .form-control {
+        border-left: none;
+        border-radius: 0 12px 12px 0;
+        font-size: 1.2rem;
+        padding: 1rem;
+        font-weight: 600;
+    }
+
+    .alert {
+        border-radius: 15px;
+        border: none;
+        padding: 1.3rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .alert-success {
+        background: linear-gradient(135deg, rgba(132, 250, 176, 0.15), rgba(143, 211, 244, 0.15));
+        border-left: 4px solid #28a745;
+    }
+
+    .alert-info {
+        background: linear-gradient(135deg, rgba(17, 153, 142, 0.1), rgba(56, 239, 125, 0.1));
+        border-left: 4px solid #11998e;
+    }
+
+    .info-box {
+        background: linear-gradient(135deg, rgba(168, 237, 234, 0.2), rgba(254, 214, 227, 0.2));
+        border: 2px solid #a8edea;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .info-box h6 {
+        color: #004085;
+        font-weight: 700;
+        margin-bottom: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-box a {
+        color: #11998e;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .info-box a:hover {
+        color: #38ef7d;
+        text-decoration: underline;
+    }
+
+    .action-btn-config {
+        padding: 0.8rem 2rem;
+        border-radius: 12px;
+        border: none;
+        font-weight: 600;
+        font-size: 1.05rem;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        text-decoration: none;
+    }
+
+    .action-btn-config:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+    }
+
+    .btn-cancel-config {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        color: white;
+    }
+
+    .btn-save-config {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+    }
+
+    .last-updated {
+        background: linear-gradient(135deg, rgba(108, 117, 125, 0.05), rgba(73, 80, 87, 0.05));
+        padding: 1rem;
+        border-radius: 10px;
+        text-align: center;
+        color: #6c757d;
+    }
+
+    @@keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+</style>
+
+<div class="container-fluid config-container">
+    <div class="page-header-config">
+        <h2><i class="fas fa-cog"></i> Billing & Menu Configuration</h2>
+        <p>Configure billing rates and manage weekly menu plans</p>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <ul class="nav nav-tabs-custom justify-content-center mb-4" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="billing-tab" data-bs-toggle="tab" data-bs-target="#billing" type="button" role="tab">
+                <i class="fas fa-file-invoice-dollar"></i> Billing Configuration
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="menu-tab" data-bs-toggle="tab" data-bs-target="#menu" type="button" role="tab">
+                <i class="fas fa-utensils"></i> Weekly Menu Plan
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content">
+        <!-- Billing Configuration Tab -->
+        <div class="tab-pane fade show active" id="billing" role="tabpanel">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="config-card">
+                        <div class="card-header">
+                            <i class="fas fa-sliders-h"></i> Billing Settings
+                        </div>
+                        <div class="card-body">
+                            @if (TempData["Success"] != null)
+                            {
+                                <div class="alert alert-success alert-dismissible fade show">
+                                    <i class="fas fa-check-circle"></i> @TempData["Success"]
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            }
+
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i>
+                                <strong>Note:</strong> Water bill is shared equally among all active teachers. Food prices are based on individual menu item rates.
+                            </div>
+
+                            <form asp-action="UpdateConfiguration" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="ConfigId" value="@Model.config?.ConfigId" />
+
+                                <div class="section-header">
+                                    <h5><i class="fas fa-tint"></i> Water Bill Configuration</h5>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label">
+                                        Monthly Water Bill Total (Rs. )
+                                    </label>
+                                    <div class="input-group input-group-lg">
+                                        <span class="input-group-text">Rs. </span>
+                                        <input name="MonthlyWaterBillTotal" class="form-control" type="number" step="0.01" 
+                                               value="@Model.config?.MonthlyWaterBillTotal" required />
+                                    </div>
+                                    <small class="form-text text-muted">
+                                        This amount will be divided equally among all active teachers.
+                                    </small>
+                                </div>
+
+                                <div class="section-header">
+                                    <h5><i class="fas fa-calculator"></i> Default Meal Rates (Fallback)</h5>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Breakfast Rate (Rs. )</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">Rs. </span>
+                                            <input name="DefaultBreakfastRate" class="form-control" type="number" step="0.01" 
+                                                   value="@Model.config?.DefaultBreakfastRate" required />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Lunch Rate (Rs. )</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">Rs. </span>
+                                            <input name="DefaultLunchRate" class="form-control" type="number" step="0.01" 
+                                                   value="@Model.config?.DefaultLunchRate" required />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Dinner Rate (Rs. )</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">Rs. </span>
+                                            <input name="DefaultDinnerRate" class="form-control" type="number" step="0.01" 
+                                                   value="@Model.config?.DefaultDinnerRate" required />
+                                        </div>
+                                    </div>
+                                </div>
+                                <small class="form-text text-muted">
+                                    <i class="fas fa-lightbulb"></i> These rates are used as fallback when no specific menu item is found for a day.
+                                </small>
+
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                    <a asp-controller="Admin" asp-action="Index" class="action-btn-config btn-cancel-config">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </a>
+                                    <button type="submit" class="action-btn-config btn-save-config">
+                                        <i class="fas fa-save"></i> Save Configuration
+                                    </button>
+                                </div>
+                            </form>
+
+                            @if (Model.config != null && Model.config.LastUpdated != DateTime.MinValue)
+                            {
+                                <div class="mt-4 pt-3">
+                                    <div class="last-updated">
+                                        <i class="fas fa-clock"></i>
+                                        <strong>Last updated:</strong> @Model.config.LastUpdated.ToString("MMMM dd, yyyy hh:mm tt")
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weekly Menu Plan Tab -->
+        <div class="tab-pane fade" id="menu" role="tabpanel">
+            <div class="row justify-content-center">
+                <div class="col-12">
+                    <div class="config-card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-utensils"></i> Weekly Menu Plan with Rates</span>
+                            <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#addMenuModal">
+                                <i class="fas fa-plus"></i> Add Menu Item
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            @if (Model.menuItems == null || !Model.menuItems.Any())
+                            {
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle"></i> No menu items found. Click "Add Menu Item" to start creating your weekly menu plan.
+                                </div>
+                            }
+                            else
+                            {
+                                @foreach (var day in new[] { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" })
+                                {
+                                    var dayItems = Model.menuItems.Where(m => m.DayOfWeek == day && m.IsActive).ToList();
+                                    if (dayItems.Any())
+                                    {
+                                        <div class="mb-4">
+                                            <h5 class="day-badge mb-3">@day</h5>
+                                            <div class="table-responsive">
+                                                <table class="menu-table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Meal Type</th>
+                                                            <th>Item Name</th>
+                                                            <th>Description</th>
+                                                            <th>Rate</th>
+                                                            <th style="width: 100px;">Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var item in dayItems.OrderBy(m => m.MealType))
+                                                        {
+                                                            <tr>
+                                                                <td>
+                                                                    <span class="meal-badge meal-@item.MealType.ToLower()">
+                                                                        @item.MealType
+                                                                    </span>
+                                                                </td>
+                                                                <td><strong>@item.ItemName</strong></td>
+                                                                <td>@(item.Description ?? "-")</td>
+                                                                <td><span class="rate-badge">Rs. @item.RatePerServing.ToString("0.00")</span></td>
+                                                                <td>
+                                                                    <button type="button" class="btn btn-sm btn-primary" 
+                                                                            onclick="editMenuItem(@item.MenuItemId, '@item.ItemName', '@item.Description', '@item.MealType', '@item.DayOfWeek', @item.RatePerServing)">
+                                                                        <i class="fas fa-edit"></i>
+                                                                    </button>
+                                                                    <form asp-action="DeleteMenuItem" method="post" style="display:inline;" 
+                                                                          onsubmit="return confirm('Delete this menu item?');">
+                                                                        <input type="hidden" name="menuItemId" value="@item.MenuItemId" />
+                                                                        <button type="submit" class="btn btn-sm btn-danger">
+                                                                            <i class="fas fa-trash"></i>
+                                                                        </button>
+                                                                    </form>
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Menu Item Modal -->
+<div class="modal fade" id="addMenuModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-plus-circle"></i> Add Menu Item</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="AddMenuItem" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Day of Week</label>
+                        <select name="DayOfWeek" class="form-select" required>
+                            <option value="">Select Day</option>
+                            <option value="Monday">Monday</option>
+                            <option value="Tuesday">Tuesday</option>
+                            <option value="Wednesday">Wednesday</option>
+                            <option value="Thursday">Thursday</option>
+                            <option value="Friday">Friday</option>
+                            <option value="Saturday">Saturday</option>
+                            <option value="Sunday">Sunday</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Meal Type</label>
+                        <select name="MealType" class="form-select" required>
+                            <option value="">Select Meal</option>
+                            <option value="Breakfast">Breakfast</option>
+                            <option value="Lunch">Lunch</option>
+                            <option value="Dinner">Dinner</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Item Name</label>
+                        <input type="text" name="ItemName" class="form-control" required maxlength="100" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea name="Description" class="form-control" rows="2" maxlength="500"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Rate Per Serving (Rs. )</label>
+                        <div class="input-group">
+                            <span class="input-group-text">Rs. </span>
+                            <input type="number" name="RatePerServing" class="form-control" step="0.01" min="0" max="10000" required />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Add Item
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Menu Item Modal -->
+<div class="modal fade" id="editMenuModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-edit"></i> Edit Menu Item</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="UpdateMenuItem" method="post">
+                <input type="hidden" id="edit_MenuItemId" name="MenuItemId" />
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Day of Week</label>
+                        <select id="edit_DayOfWeek" name="DayOfWeek" class="form-select" required>
+                            <option value="Monday">Monday</option>
+                            <option value="Tuesday">Tuesday</option>
+                            <option value="Wednesday">Wednesday</option>
+                            <option value="Thursday">Thursday</option>
+                            <option value="Friday">Friday</option>
+                            <option value="Saturday">Saturday</option>
+                            <option value="Sunday">Sunday</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Meal Type</label>
+                        <select id="edit_MealType" name="MealType" class="form-select" required>
+                            <option value="Breakfast">Breakfast</option>
+                            <option value="Lunch">Lunch</option>
+                            <option value="Dinner">Dinner</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Item Name</label>
+                        <input type="text" id="edit_ItemName" name="ItemName" class="form-control" required maxlength="100" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea id="edit_Description" name="Description" class="form-control" rows="2" maxlength="500"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Rate Per Serving (Rs. )</label>
+                        <div class="input-group">
+                            <span class="input-group-text">Rs. </span>
+                            <input type="number" id="edit_RatePerServing" name="RatePerServing" class="form-control" step="0.01" min="0" max="10000" required />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Update Item
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function editMenuItem(id, name, description, mealType, dayOfWeek, rate) {
+        document.getElementById('edit_MenuItemId').value = id;
+        document.getElementById('edit_ItemName').value = name;
+        document.getElementById('edit_Description').value = description || '';
+        document.getElementById('edit_MealType').value = mealType;
+        document.getElementById('edit_DayOfWeek').value = dayOfWeek;
+        document.getElementById('edit_RatePerServing').value = rate;
+        
+        var editModal = new bootstrap.Modal(document.getElementById('editMenuModal'));
+        editModal.show();
+    }
+</script>

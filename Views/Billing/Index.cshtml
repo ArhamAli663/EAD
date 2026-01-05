@@ -1,0 +1,406 @@
+@model IEnumerable<MessManagementSystem.Models.Bill>
+
+@{
+    ViewData["Title"] = "Billing Management";
+}
+
+<style>
+    .billing-container {
+        min-height: 100vh;
+        padding: 2rem 0;
+        background: linear-gradient(135deg, rgba(17, 153, 142, 0.02), rgba(56, 239, 125, 0.02));
+    }
+
+    .page-header-billing {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        padding: 2.5rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 40px rgba(17, 153, 142, 0.3);
+        animation: slideDown 0.5s ease;
+    }
+
+    .page-header-billing h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+
+    .page-header-billing p {
+        margin: 0.5rem 0 0 0;
+        opacity: 0.95;
+        font-size: 1.05rem;
+    }
+
+    .billing-actions {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        animation: slideUp 0.6s ease;
+    }
+
+    .billing-action-btn {
+        padding: 0.85rem 1.8rem;
+        border-radius: 12px;
+        border: none;
+        font-weight: 600;
+        font-size: 1.05rem;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        text-decoration: none;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .billing-action-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+    }
+
+    .btn-generate {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+    }
+
+    .btn-generate:hover {
+        color: white;
+    }
+
+    .btn-config {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+    }
+
+    .btn-config:hover {
+        color: white;
+    }
+
+    .billing-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        animation: fadeIn 0.6s ease;
+    }
+
+    .billing-card .card-header {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        font-weight: 600;
+        font-size: 1.2rem;
+        padding: 1.5rem 2rem;
+        border: none;
+    }
+
+    .billing-card .card-body {
+        padding: 2rem;
+    }
+
+    .billing-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .billing-table thead th {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        font-weight: 600;
+        padding: 1.2rem 1rem;
+        border: none;
+        text-align: left;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+    }
+
+    .billing-table thead th:first-child {
+        border-top-left-radius: 12px;
+    }
+
+    .billing-table thead th:last-child {
+        border-top-right-radius: 12px;
+    }
+
+    .billing-table tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #f0f0f0;
+        animation: slideUp 0.4s ease;
+    }
+
+    .billing-table tbody tr:hover {
+        background: linear-gradient(to right, rgba(17, 153, 142, 0.05), rgba(56, 239, 125, 0.05));
+        transform: scale(1.01);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .billing-table tbody td {
+        padding: 1.2rem 1rem;
+        vertical-align: middle;
+        font-size: 0.95rem;
+    }
+
+    .total-amount {
+        font-size: 1.2rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .meal-count-badge {
+        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        color: #004085;
+        padding: 0.4rem 0.9rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        display: inline-block;
+    }
+
+    .status-paid {
+        background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+        color: #155724;
+    }
+
+    .status-pending {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+    }
+
+    .action-btn-billing {
+        padding: 0.4rem 1rem;
+        font-size: 0.85rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .action-btn-billing:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-mark-paid {
+        background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+        color: #155724;
+    }
+
+    .btn-delete-bill {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 5rem 2rem;
+        animation: fadeIn 0.8s ease;
+    }
+
+    .empty-state i {
+        font-size: 5rem;
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1.5rem;
+        animation: pulse 2s ease infinite;
+    }
+
+    .empty-state h5 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #495057;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+        font-size: 1.1rem;
+        max-width: 500px;
+        margin: 0 auto 2rem;
+    }
+
+    @@keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    @@keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.6;
+        }
+    }
+</style>
+
+<div class="container-fluid billing-container">
+    <div class="page-header-billing">
+        <h2><i class="fas fa-file-invoice-dollar"></i> Billing Management</h2>
+        <p>Manage monthly bills, track payments, and generate new bills for teachers</p>
+    </div>
+
+    <!-- Help Instructions -->
+    <div class="alert alert-info shadow-sm mb-4" style="border-left: 5px solid #0dcaf0;">
+        <h6 class="mb-2"><i class="fas fa-lightbulb me-2"></i><strong>Quick Guide:</strong></h6>
+        <div class="row small">
+            <div class="col-md-6">
+                <strong><i class="fas fa-file-invoice me-1"></i> Generate Bills:</strong> Create monthly bills for teachers based on their meal consumption<br>
+                <strong><i class="fas fa-check-circle me-1"></i> Mark as Paid:</strong> Update bill status when teacher makes payment
+            </div>
+            <div class="col-md-6">
+                <strong><i class="fas fa-cog me-1"></i> Configuration:</strong> Set meal rates, water charges, and billing rules<br>
+                <strong><i class="fas fa-trash me-1"></i> Delete Bill:</strong> Remove incorrect or duplicate bills
+            </div>
+        </div>
+    </div>
+
+    <div class="billing-actions">
+        <a asp-action="Generate" class="billing-action-btn btn-generate" title="Generate new monthly bills for selected teachers">
+            <i class="fas fa-file-invoice"></i> Generate Bills
+        </a>
+        <a asp-action="Configuration" class="billing-action-btn btn-config" title="Configure billing rates and settings">
+            <i class="fas fa-cog"></i> Billing Configuration
+        </a>
+    </div>
+
+    <div class="billing-card">
+    <div class=\"card-header\">
+        <i class=\"fas fa-file-invoice-dollar\"></i> All Bills
+    </div>
+    <div class=\"card-body\">
+        @if (Model != null && Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="billing-table">
+                    <thead>
+                        <tr>
+                            <th>Teacher Name</th>
+                            <th>Period</th>
+                            <th class="text-end">Food Bill</th>
+                            <th class="text-end">Water Bill</th>
+                            <th class="text-end">Total Bill</th>
+                            <th>Meals</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var bill in Model)
+                        {
+                            <tr>
+                                <td><strong>@bill.Teacher.FullName</strong></td>
+                                <td>@(new DateTime(bill.Year, bill.Month, 1).ToString("MMMM yyyy"))</td>
+                                <td class="text-end">Rs. @bill.FoodBill.ToString("N2")</td>
+                                <td class="text-end">Rs. @bill.WaterBill.ToString("N2")</td>
+                                <td class="text-end">
+                                    <span class="total-amount">Rs. @bill.TotalBill.ToString("N2")</span>
+                                </td>
+                                <td>
+                                    <span class="meal-count-badge">@bill.TotalMealsConsumed meals</span>
+                                </td>
+                                <td>
+                                    @if (bill.IsPaid)
+                                    {
+                                        <span class="status-badge status-paid">
+                                            <i class="fas fa-check"></i> Paid
+                                        </span>
+                                        <small class="d-block text-muted mt-1">
+                                            @bill.PaidDate?.ToString("MMM dd, yyyy")
+                                        </small>
+                                    }
+                                    else
+                                    {
+                                        <span class="status-badge status-pending">
+                                            <i class="fas fa-clock"></i> Pending
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!bill.IsPaid)
+                                    {
+                                        <form asp-action="MarkPaid" asp-route-id="@bill.BillId" 
+                                              method="post" class="d-inline"
+                                              onsubmit="return confirm('Mark this bill as paid?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="action-btn-billing btn-mark-paid">
+                                                <i class="fas fa-check"></i> Mark Paid
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <form asp-action="Delete" asp-route-id="@bill.BillId" 
+                                              method="post" class="d-inline"
+                                              onsubmit="return confirm('Are you sure you want to delete this paid bill? This action cannot be undone.');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="action-btn-billing btn-delete-bill">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="fas fa-file-invoice"></i>
+                <h5>No Bills Found</h5>
+                <p class="text-muted mb-4">You haven't generated any bills yet. Click the button below to get started!</p>
+                <a asp-action="Generate" class="billing-action-btn btn-generate" style="width: auto; display: inline-flex;">
+                    <i class="fas fa-plus-circle"></i> Generate Your First Bill
+                </a>
+            </div>
+        }
+    </div>
+</div>
+</div>

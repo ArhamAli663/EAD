@@ -1,0 +1,544 @@
+@model MessManagementSystem.Models.Teacher
+
+@{
+    ViewData["Title"] = "Generate Bill";
+    int selectedMonth = ViewBag.SelectedMonth ?? DateTime.Now.Month;
+    int selectedYear = ViewBag.SelectedYear ?? DateTime.Now.Year;
+    var teachers = ViewBag.Teachers as List<MessManagementSystem.Models.Teacher>;
+    var selectedTeacherId = ViewBag.SelectedTeacherId as int?;
+}
+
+<style>
+    .generate-container {
+        min-height: 100vh;
+        padding: 2rem 0;
+        background: linear-gradient(135deg, rgba(17, 153, 142, 0.02), rgba(56, 239, 125, 0.02));
+    }
+
+    .page-header-generate {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        padding: 2.5rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 40px rgba(17, 153, 142, 0.3);
+        animation: slideDown 0.5s ease;
+    }
+
+    .page-header-generate h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+
+    .page-header-generate p {
+        margin: 0.5rem 0 0 0;
+        opacity: 0.95;
+        font-size: 1.05rem;
+    }
+
+    .breadcrumb {
+        background: transparent;
+        padding: 0.5rem 0;
+        margin-bottom: 1rem;
+    }
+
+    .breadcrumb-item a {
+        color: #11998e;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .breadcrumb-item a:hover {
+        color: #38ef7d;
+    }
+
+    .generate-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        animation: fadeIn 0.6s ease;
+        border: 1px solid rgba(17, 153, 142, 0.1);
+    }
+
+    .generate-card .card-header {
+        background: linear-gradient(135deg, rgba(17, 153, 142, 0.1), rgba(56, 239, 125, 0.1));
+        border-bottom: 3px solid #11998e;
+        font-weight: 600;
+        font-size: 1.3rem;
+        padding: 1.5rem 2rem;
+        color: #11998e;
+    }
+
+    .generate-card .card-body {
+        padding: 2.5rem;
+    }
+
+    .info-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        margin-top: 2rem;
+        border: 1px solid rgba(17, 153, 142, 0.1);
+    }
+
+    .info-card .card-header {
+        background: linear-gradient(135deg, rgba(17, 153, 142, 0.08), rgba(56, 239, 125, 0.08));
+        border-bottom: 2px solid #11998e;
+        padding: 1rem 1.5rem;
+    }
+
+    .info-card .card-header h6 {
+        margin: 0;
+        color: #11998e;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-card .card-body {
+        padding: 1.5rem;
+    }
+
+    .info-card ol {
+        margin: 0;
+        padding-left: 1.2rem;
+    }
+
+    .info-card li {
+        margin-bottom: 0.8rem;
+        color: #495057;
+    }
+
+    .info-card li strong {
+        color: #11998e;
+    }
+
+    .alert {
+        border-radius: 15px;
+        border: none;
+        padding: 1.3rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .alert-info {
+        background: linear-gradient(135deg, rgba(17, 153, 142, 0.1), rgba(56, 239, 125, 0.1));
+        border-left: 4px solid #11998e;
+    }
+
+    .bulk-generate-box {
+        background: linear-gradient(135deg, rgba(132, 250, 176, 0.15), rgba(143, 211, 244, 0.15));
+        border: 3px solid #84fab0;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 5px 20px rgba(132, 250, 176, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .bulk-generate-box:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(132, 250, 176, 0.4);
+    }
+
+    .bulk-generate-box h6 {
+        color: #155724;
+        font-weight: 700;
+        margin-bottom: 0.3rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-select, .form-control {
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        padding: 0.75rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-select:focus, .form-control:focus {
+        border-color: #11998e;
+        box-shadow: 0 0 0 0.25rem rgba(17, 153, 142, 0.15);
+        transform: scale(1.02);
+    }
+
+    .form-select-lg {
+        font-size: 1.05rem;
+        padding: 1rem;
+        font-weight: 500;
+    }
+
+    .action-btn-generate {
+        padding: 0.85rem 2rem;
+        border-radius: 12px;
+        border: none;
+        font-weight: 600;
+        font-size: 1.05rem;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        text-decoration: none;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .action-btn-generate:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+    }
+
+    .btn-generate-main {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        font-size: 1.15rem;
+        padding: 1rem 2.5rem;
+    }
+
+    .btn-generate-all {
+        background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+        color: #155724;
+        font-size: 1.05rem;
+        padding: 0.8rem 2rem;
+        box-shadow: 0 4px 15px rgba(132, 250, 176, 0.4);
+    }
+
+    .btn-back {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        color: white;
+    }
+
+    .divider {
+        text-align: center;
+        margin: 2rem 0;
+        position: relative;
+    }
+
+    .divider::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(to right, transparent, #e0e0e0, transparent);
+    }
+
+    .divider strong {
+        background: white;
+        padding: 0 1.5rem;
+        position: relative;
+        color: #6c757d;
+        font-size: 1.1rem;
+    }
+
+    .modal-content {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-header {
+        border-radius: 20px 20px 0 0;
+        padding: 1.5rem 2rem;
+    }
+
+    .modal-header.bg-success {
+        background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%) !important;
+        color: #155724 !important;
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .modal-footer {
+        border-top: 1px solid #e0e0e0;
+        padding: 1.5rem 2rem;
+    }
+
+    .modal .btn {
+        padding: 0.7rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .modal .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    @@keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+</style>
+
+<div class="container-fluid generate-container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-controller="Admin" asp-action="Index"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li class="breadcrumb-item"><a asp-action="Index">Bills</a></li>
+                    <li class="breadcrumb-item active">Generate Bill</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="page-header-generate">
+        <h2><i class="fas fa-file-invoice-dollar"></i> Generate Monthly Bill</h2>
+        <p>Create bills for individual teachers or generate all bills at once</p>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="generate-card">
+                <div class="card-header">
+                    <i class="fas fa-file-invoice-dollar"></i> Bill Generation Options
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Note:</strong> Select a teacher and billing period. The bill will include:
+                        <ul class="mb-0 mt-2">
+                            <li>Food charges based on attendance records</li>
+                            <li>Water bill (shared equally among all active teachers)</li>
+                            <li>Previous unpaid balance (if any)</li>
+                        </ul>
+                    </div>
+
+                    <!-- Generate All Bills Option -->
+                    <div class="bulk-generate-box">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <h6 class="mb-1"><i class="fas fa-users"></i> Bulk Bill Generation</h6>
+                                <p class="mb-0 small">Generate bills for all active teachers at once</p>
+                            </div>
+                            <button type="button" class="action-btn-generate btn-generate-all" data-bs-toggle="modal" data-bs-target="#generateAllModal">
+                                <i class="fas fa-bolt"></i> Generate All Bills
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="divider">
+                        <strong>--- OR ---</strong>
+                    </div>
+
+                    <h6 class="text-muted mb-3"><i class="fas fa-user"></i> Generate Bill for Individual Teacher</h6>
+
+                    <form asp-action="Generate" method="post">
+                        @Html.AntiForgeryToken()
+                        
+                        <div class="mb-4">
+                            <label for="teacherId" class="form-label fw-bold">
+                                <i class="fas fa-user"></i> Select Teacher <span class="text-danger">*</span>
+                            </label>
+                            <select name="teacherId" id="teacherId" class="form-select form-select-lg" required>
+                                <option value="">-- Choose a Teacher --</option>
+                                @if (teachers != null)
+                                {
+                                    foreach (var teacher in teachers)
+                                    {
+                                        <option value="@teacher.TeacherId" selected="@(teacher.TeacherId == selectedTeacherId)">
+                                            @teacher.FullName (@teacher.Email) - @teacher.Department
+                                        </option>
+                                    }
+                                }
+                            </select>
+                            <small class="text-muted">Select the teacher for whom you want to generate the bill</small>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="month" class="form-label fw-bold">
+                                    <i class="fas fa-calendar-alt"></i> Select Month <span class="text-danger">*</span>
+                                </label>
+                                <select name="month" id="month" class="form-select" required>
+                                    @for (int i = 1; i <= 12; i++)
+                                    {
+                                        <option value="@i" selected="@(i == selectedMonth)">
+                                            @(new DateTime(selectedYear, i, 1).ToString("MMMM"))
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="year" class="form-label fw-bold">
+                                    <i class="fas fa-calendar"></i> Select Year <span class="text-danger">*</span>
+                                </label>
+                                <select name="year" id="year" class="form-select" required>
+                                    @for (int y = DateTime.Now.Year - 2; y <= DateTime.Now.Year + 1; y++)
+                                    {
+                                        <option value="@y" selected="@(y == selectedYear)">@y</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <hr />
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="action-btn-generate btn-generate-main">
+                                <i class="fas fa-calculator"></i> Generate Bill
+                            </button>
+                            <a asp-action="Index" class="action-btn-generate btn-back">
+                                <i class="fas fa-arrow-left"></i> Back to Bills
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Information Card -->
+            <div class="info-card">
+                <div class="card-header">
+                    <h6><i class="fas fa-question-circle"></i> How Bill Generation Works</h6>
+                </div>
+                <div class="card-body">
+                    <ol class="mb-0">
+                        <li class="mb-2"><strong>Select Teacher:</strong> Choose the teacher from the dropdown (shows active teachers only)</li>
+                        <li class="mb-2"><strong>Choose Period:</strong> Select the month and year for which you want to generate the bill</li>
+                        <li class="mb-2"><strong>Generate:</strong> The system will calculate:
+                            <ul class="mt-1">
+                                <li>Food bill based on meals consumed (from attendance records)</li>
+                                <li>Water bill per teacher (Total water bill ÷ Number of active teachers)</li>
+                                <li>Any previous unpaid balance will be carried forward</li>
+                            </ul>
+                        </li>
+                        <li class="mb-0"><strong>Update:</strong> If a bill already exists for that period, it will be updated with new calculations</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Generate All Bills Modal -->
+<div class="modal fade" id="generateAllModal" tabindex="-1" aria-labelledby="generateAllModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="generateAllModalLabel">
+                    <i class="fas fa-users"></i> Generate Bills for All Teachers
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="GenerateAllBills" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Important:</strong> This will generate bills for ALL active teachers.
+                    </div>
+
+                    <p class="mb-3">Select the billing period:</p>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="bulkMonth" class="form-label fw-bold">
+                                <i class="fas fa-calendar-alt"></i> Month
+                            </label>
+                            <select name="month" id="bulkMonth" class="form-select" required>
+                                @for (int i = 1; i <= 12; i++)
+                                {
+                                    <option value="@i" selected="@(i == selectedMonth)">
+                                        @(new DateTime(selectedYear, i, 1).ToString("MMMM"))
+                                    </option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="bulkYear" class="form-label fw-bold">
+                                <i class="fas fa-calendar"></i> Year
+                            </label>
+                            <select name="year" id="bulkYear" class="form-select" required>
+                                @for (int y = DateTime.Now.Year - 2; y <= DateTime.Now.Year + 1; y++)
+                                {
+                                    <option value="@y" selected="@(y == selectedYear)">@y</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info mb-0">
+                        <h6><i class="fas fa-check-circle"></i> What will happen:</h6>
+                        <ul class="mb-0 small">
+                            <li>Bills will be generated for all active teachers</li>
+                            <li>Existing unpaid bills will be updated</li>
+                            <li>Already paid bills will be skipped</li>
+                            <li>Attendance records will be cleared after generation</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-success" onclick="return confirm('Are you sure you want to generate bills for ALL active teachers?');">
+                        <i class="fas fa-bolt"></i> Generate All Bills
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Add visual feedback when teacher is selected
+        document.getElementById('teacherId').addEventListener('change', function() {
+            if (this.value) {
+                this.classList.add('border-success');
+                this.classList.remove('border-danger');
+            } else {
+                this.classList.add('border-danger');
+                this.classList.remove('border-success');
+            }
+        });
+    </script>
+}

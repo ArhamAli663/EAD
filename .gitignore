@@ -1,0 +1,46 @@
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# SQL Server Database files
+*.mdf
+*.ldf
+*.ndf
+
+# NuGet
+*.nupkg
+**/packages/*
+!**/packages/build/
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Backup files
+*.bak
+*.backup
+*.backup2
+*.broken
+
+# Publish output
+publish/
+
+# User-specific files
+*.rsuser
+*.user
+*.user.*
+
+# JetBrains Rider
+.idea/

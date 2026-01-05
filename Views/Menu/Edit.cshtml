@@ -1,0 +1,205 @@
+@model MessManagementSystem.Models.MenuItem
+
+@{
+    ViewData["Title"] = "Edit Menu Item";
+}
+
+<style>
+    .edit-menu-container {
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .edit-menu-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        animation: fadeIn 0.6s ease;
+    }
+
+    .edit-menu-card .card-header {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        font-weight: 600;
+        font-size: 1.3rem;
+        padding: 1.5rem 2rem;
+        border: none;
+    }
+
+    .edit-menu-card .card-body {
+        padding: 2.5rem;
+    }
+
+    .form-floating {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-floating > .form-control {
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        padding: 1rem 0.75rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-floating > .form-control:focus {
+        border-color: #11998e;
+        box-shadow: 0 0 0 0.25rem rgba(17, 153, 142, 0.15);
+        transform: scale(1.02);
+    }
+
+    .form-floating > label {
+        padding: 1rem 0.75rem;
+    }
+
+    .form-select {
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        padding: 0.75rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-select:focus {
+        border-color: #11998e;
+        box-shadow: 0 0 0 0.25rem rgba(17, 153, 142, 0.15);
+    }
+
+    .input-group-text {
+        border: 2px solid #e0e0e0;
+        border-radius: 12px 0 0 12px;
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .input-group .form-control {
+        border-left: none;
+        border-radius: 0 12px 12px 0;
+    }
+
+    .form-check-input:checked {
+        background-color: #11998e;
+        border-color: #11998e;
+    }
+
+    .action-btn-form {
+        padding: 0.7rem 1.8rem;
+        border-radius: 12px;
+        border: none;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .action-btn-form:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-cancel-form {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+    }
+
+    .btn-update-form {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+</style>
+
+<div class="container-fluid edit-menu-container">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="edit-menu-card">
+            <div class="card-header">
+                <i class="fas fa-edit"></i> Edit Menu Item
+            </div>
+            <div class="card-body">
+                <form asp-action="Edit" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="MenuItemId" />
+                    <input type="hidden" asp-for="CreatedDate" />
+                    
+                    <div class="mb-3">
+                        <label asp-for="ItemName" class="form-label"></label>
+                        <input asp-for="ItemName" class="form-control" required />
+                        <span asp-validation-for="ItemName" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label"></label>
+                        <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="DayOfWeek" class="form-label"></label>
+                            <select asp-for="DayOfWeek" class="form-select" required>
+                                <option value="Monday">Monday</option>
+                                <option value="Tuesday">Tuesday</option>
+                                <option value="Wednesday">Wednesday</option>
+                                <option value="Thursday">Thursday</option>
+                                <option value="Friday">Friday</option>
+                                <option value="Saturday">Saturday</option>
+                                <option value="Sunday">Sunday</option>
+                            </select>
+                            <span asp-validation-for="DayOfWeek" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="MealType" class="form-label"></label>
+                            <select asp-for="MealType" class="form-select" required>
+                                <option value="Lunch">Lunch</option>
+                                <option value="Dinner">Dinner</option>
+                            </select>
+                            <span asp-validation-for="MealType" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="RatePerServing" class="form-label"></label>
+                        <div class="input-group">
+                            <span class="input-group-text">Rs. </span>
+                            <input asp-for="RatePerServing" class="form-control" type="number" step="0.01" required />
+                        </div>
+                        <span asp-validation-for="RatePerServing" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                            <label class="form-check-label" asp-for="IsActive">Active</label>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <a asp-action="Index" class="action-btn-form btn-cancel-form">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                        <button type="submit" class="action-btn-form btn-update-form">
+                            <i class="fas fa-save"></i> Update Menu Item
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</div>

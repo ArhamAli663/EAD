@@ -1,0 +1,244 @@
+@model MessManagementSystem.Models.Teacher
+
+@{
+    ViewData["Title"] = "Edit Teacher";
+}
+
+<style>
+    .edit-teacher-container {
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .form-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        overflow: hidden;
+        animation: slideUp 0.6s ease-out;
+    }
+
+    .form-card .card-header {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        padding: 2rem;
+        border: none;
+    }
+
+    .form-card .card-header h3 {
+        margin: 0;
+        font-weight: 700;
+        text-shadow: 1px 1px 2px rgba(255,255,255,0.3);
+    }
+
+    .form-section-title {
+        color: #11998e;
+        font-weight: 700;
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 3px solid #11998e;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-floating {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-floating > .form-control,
+    .form-floating > .form-select {
+        height: calc(3.5rem + 2px);
+        padding: 1rem 1rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .form-floating > .form-control:focus,
+    .form-floating > .form-select:focus {
+        border-color: #11998e;
+        box-shadow: 0 0 0 0.25rem rgba(17, 153, 142, 0.15);
+    }
+
+    .form-floating > label {
+        padding: 1rem 1rem;
+        color: #6c757d;
+    }
+
+    .required-asterisk {
+        color: #dc3545;
+        font-weight: bold;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid #f0f0f0;
+    }
+
+    .btn-back {
+        background: #11998e;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        color: white;
+    }
+
+    .btn-back:hover {
+        background: #38ef7d;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(17, 153, 142, 0.3);
+    }
+
+    .btn-update {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        border: none;
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        color: white;
+    }
+
+    .btn-update:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(17, 153, 142, 0.4);
+        color: white;
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .status-select {
+        cursor: pointer;
+    }
+</style>
+
+<div class="container edit-teacher-container">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card form-card">
+                <div class="card-header">
+                    <h3>
+                        <i class="fas fa-edit me-2"></i>Edit Teacher
+                    </h3>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    <form asp-action="EditTeacher" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="TeacherId" />
+                        <input type="hidden" asp-for="UserId" />
+                        <input type="hidden" asp-for="JoiningDate" />
+
+                        <!-- Personal Information Section -->
+                        <div class="form-section-title">
+                            <i class="fas fa-user"></i>
+                            <span>Personal Information</span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-floating">
+                                    <input asp-for="FullName" class="form-control" id="fullName" 
+                                           placeholder="Full Name" required />
+                                    <label for="fullName">
+                                        <i class="fas fa-user me-2"></i>Full Name <span class="required-asterisk">*</span>
+                                    </label>
+                                    <span asp-validation-for="FullName" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="Email" type="email" class="form-control" id="email" 
+                                           placeholder="Email Address" required />
+                                    <label for="email">
+                                        <i class="fas fa-envelope me-2"></i>Email Address <span class="required-asterisk">*</span>
+                                    </label>
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="PhoneNumber" type="tel" class="form-control" id="phone" 
+                                           placeholder="Phone Number" required />
+                                    <label for="phone">
+                                        <i class="fas fa-phone me-2"></i>Phone Number <span class="required-asterisk">*</span>
+                                    </label>
+                                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="Department" class="form-control" id="department" 
+                                           placeholder="Department" required />
+                                    <label for="department">
+                                        <i class="fas fa-building me-2"></i>Department <span class="required-asterisk">*</span>
+                                    </label>
+                                    <span asp-validation-for="Department" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select asp-for="IsActive" class="form-select status-select" id="status">
+                                        <option value="true">Active</option>
+                                        <option value="false">Inactive</option>
+                                    </select>
+                                    <label for="status">
+                                        <i class="fas fa-toggle-on me-2"></i>Status
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="form-actions">
+                            <a asp-action="ManageTeachers" class="btn btn-back">
+                                <i class="fas fa-arrow-left me-2"></i>Back to List
+                            </a>
+                            <button type="submit" class="btn btn-update">
+                                <i class="fas fa-save me-2"></i>Update Teacher
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add focus animations to form controls
+            const inputs = document.querySelectorAll('.form-control, .form-select');
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.style.transform = 'scale(1.02)';
+                });
+                input.addEventListener('blur', function() {
+                    this.parentElement.style.transform = 'scale(1)';
+                });
+            });
+        });
+    </script>
+}

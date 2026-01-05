@@ -1,0 +1,215 @@
+@model IEnumerable<MessManagementSystem.Models.Attendance>
+
+@{
+    ViewData["Title"] = "View Attendance";
+    int selectedMonth = (int)(ViewBag.SelectedMonth ?? DateTime.Now.Month);
+    int selectedYear = (int)(ViewBag.SelectedYear ?? DateTime.Now.Year);
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-action="Index"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li class="breadcrumb-item active">View Attendance</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-calendar-alt"></i> My Attendance Records</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Month/Year Filter -->
+                    <form method="get" class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label for="month" class="form-label">Select Month</label>
+                            <select name="month" id="month" class="form-select">
+                                @for (int m = 1; m <= 12; m++)
+                                {
+                                    <option value="@m" selected="@(m == selectedMonth)">
+                                        @System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(m)
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="year" class="form-label">Select Year</label>
+                            <select name="year" id="year" class="form-select">
+                                @for (int y = DateTime.Now.Year; y >= DateTime.Now.Year - 2; y--)
+                                {
+                                    <option value="@y" selected="@(y == selectedYear)">@y</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">&nbsp;</label>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-search"></i> Filter
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Statistics Summary -->
+                    @if (Model != null && Model.Any())
+                    {
+                        var totalDays = Model.Count();
+                        var totalLunch = Model.Count(a => a.LunchTaken);
+                        var totalDinner = Model.Count(a => a.DinnerTaken);
+                        var totalMeals = totalLunch + totalDinner;
+
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="card bg-primary text-white">
+                                    <div class="card-body text-center">
+                                        <h3>@totalDays</h3>
+                                        <p class="mb-0">Days Present</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body text-center">
+                                        <h3>@totalLunch</h3>
+                                        <p class="mb-0">Lunch Taken</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-warning text-dark">
+                                    <div class="card-body text-center">
+                                        <h3>@totalDinner</h3>
+                                        <p class="mb-0">Dinner Taken</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Attendance Table -->
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover" id="attendanceTable">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Date</th>
+                                        <th>Day</th>
+                                        <th>Lunch</th>
+                                        <th>Dinner</th>
+                                        <th>Total Meals</th>
+                                        <th>Recorded By</th>
+                                        <th>Remarks</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        int counter = 1;
+                                    }
+                                    @foreach (var attendance in Model)
+                                    {
+                                        <tr>
+                                            <td>@counter</td>
+                                            <td><strong>@attendance.Date.ToString("dd MMM yyyy")</strong></td>
+                                            <td>@attendance.Date.DayOfWeek</td>
+                                            <td>
+                                                @if (attendance.LunchTaken)
+                                                {
+                                                    <span class="badge bg-success"><i class="fas fa-check"></i> Yes</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary"><i class="fas fa-times"></i> No</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (attendance.DinnerTaken)
+                                                {
+                                                    <span class="badge bg-success"><i class="fas fa-check"></i> Yes</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary"><i class="fas fa-times"></i> No</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary">
+                                                    @((attendance.LunchTaken ? 1 : 0) + (attendance.DinnerTaken ? 1 : 0))
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <small class="text-muted">@(attendance.RecordedBy.HasValue ? $"User #{attendance.RecordedBy}" : "System")</small>
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(attendance.Remarks))
+                                                {
+                                                    if (attendance.Remarks.Contains("[REPORTED BY TEACHER]"))
+                                                    {
+                                                        <span class="badge bg-warning text-dark">
+                                                            <i class="fas fa-flag"></i> Reported
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <small>@attendance.Remarks</small>
+                                                    }
+                                                }
+                                            </td>
+
+                                        </tr>
+                                        counter++;
+                                    }
+                                </tbody>
+                                <tfoot class="table-light">
+                                    <tr>
+                                        <th colspan="3" class="text-end">Total:</th>
+                                        <th>@totalLunch</th>
+                                        <th>@totalDinner</th>
+                                        <th><span class="badge bg-success">@totalMeals</span></th>
+                                        <th colspan="2"></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-info-circle fa-2x mb-2"></i>
+                            <h5>No Attendance Records Found</h5>
+                            <p class="mb-0">No attendance records found for @System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(selectedMonth) @selectedYear.</p>
+                        </div>
+                    }
+
+                    <div class="mt-3 text-center">
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Dashboard
+                        </a>
+                        <a asp-action="VerifyAttendance" class="btn btn-warning">
+                            <i class="fas fa-exclamation-triangle"></i> Report Wrong Attendance
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#attendanceTable').DataTable({
+                "order": [[1, "desc"]],
+                "pageLength": 25,
+                "language": {
+                    "search": "Search:",
+                    "lengthMenu": "Show _MENU_ records per page",
+                    "info": "Showing _START_ to _END_ of _TOTAL_ records"
+                }
+            });
+        });
+    </script>
+}

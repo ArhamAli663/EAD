@@ -1,0 +1,305 @@
+@model MessManagementSystem.Models.Teacher
+
+@{
+    ViewData["Title"] = "Add New Teacher";
+}
+
+<style>
+    .create-teacher-container {
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .form-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        overflow: hidden;
+        animation: slideUp 0.6s ease-out;
+    }
+
+    .form-card .card-header {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        padding: 2rem;
+        border: none;
+    }
+
+    .form-card .card-header h3 {
+        margin: 0;
+        font-weight: 700;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .form-section-title {
+        color: #11998e;
+        font-weight: 700;
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 3px solid #11998e;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-floating {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-floating > .form-control {
+        height: calc(3.5rem + 2px);
+        padding: 1rem 1rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .form-floating > .form-control:focus {
+        border-color: #11998e;
+        box-shadow: 0 0 0 0.25rem rgba(17, 153, 142, 0.15);
+    }
+
+    .form-floating > label {
+        padding: 1rem 1rem;
+        color: #6c757d;
+    }
+
+    .required-asterisk {
+        color: #dc3545;
+        font-weight: bold;
+    }
+
+    .info-alert {
+        background: linear-gradient(135deg, #11998e15 0%, #38ef7d15 100%);
+        border: none;
+        border-left: 4px solid #11998e;
+        border-radius: 10px;
+        padding: 1rem;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid #f0f0f0;
+    }
+
+    .btn-back {
+        background: #11998e;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        color: white;
+    }
+
+    .btn-back:hover {
+        background: #38ef7d;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(17, 153, 142, 0.3);
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        border: none;
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        color: white;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(17, 153, 142, 0.4);
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .alert-danger {
+        border: none;
+        border-radius: 12px;
+        background: linear-gradient(135deg, rgba(17, 153, 142, 0.08) 0%, rgba(56, 239, 125, 0.08) 100%);
+        border-left: 4px solid #dc3545;
+        animation: slideDown 0.5s ease-out;
+    }
+
+    @@keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<div class="container create-teacher-container">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card form-card">
+                <div class="card-header">
+                    <h3>
+                        <i class="fas fa-user-plus me-2"></i>Add New Teacher
+                    </h3>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show">
+                            <i class="fas fa-exclamation-triangle me-2"></i>@ViewBag.Error
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (!ViewData.ModelState.IsValid && ViewBag.Error == null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Please correct the following errors:
+                            <ul class="mb-0 mt-2">
+                                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                {
+                                    <li>@error.ErrorMessage</li>
+                                }
+                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form asp-action="CreateTeacher" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <!-- Personal Information Section -->
+                        <div class="form-section-title">
+                            <i class="fas fa-user"></i>
+                            <span>Personal Information</span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-floating">
+                                    <input asp-for="FullName" class="form-control" id="fullName" 
+                                           placeholder="Full Name" required />
+                                    <label for="fullName">
+                                        <i class="fas fa-user me-2"></i>Full Name <span class="required-asterisk">*</span>
+                                    </label>
+                                    <span asp-validation-for="FullName" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="Email" type="email" class="form-control" id="email" 
+                                           placeholder="Email Address" required />
+                                    <label for="email">
+                                        <i class="fas fa-envelope me-2"></i>Email Address <span class="required-asterisk">*</span>
+                                    </label>
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="PhoneNumber" type="tel" class="form-control" id="phone" 
+                                           placeholder="Phone Number" required />
+                                    <label for="phone">
+                                        <i class="fas fa-phone me-2"></i>Phone Number <span class="required-asterisk">*</span>
+                                    </label>
+                                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <div class="form-floating">
+                                    <input asp-for="Department" class="form-control" id="department" 
+                                           placeholder="Department" required />
+                                    <label for="department">
+                                        <i class="fas fa-building me-2"></i>Department <span class="required-asterisk">*</span>
+                                    </label>
+                                    <span asp-validation-for="Department" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Login Credentials Section -->
+                        <div class="form-section-title mt-4">
+                            <i class="fas fa-key"></i>
+                            <span>Login Credentials</span>
+                        </div>
+
+                        <div class="info-alert">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Teacher will be required to change this password on first login.
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" id="username" name="username" class="form-control" 
+                                           placeholder="Username" required />
+                                    <label for="username">
+                                        <i class="fas fa-user-circle me-2"></i>Username <span class="required-asterisk">*</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="password" id="password" name="password" class="form-control" 
+                                           placeholder="Password" required minlength="6" />
+                                    <label for="password">
+                                        <i class="fas fa-lock me-2"></i>Default Password <span class="required-asterisk">*</span>
+                                    </label>
+                                    <small class="text-muted ms-3">Minimum 6 characters</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="form-actions">
+                            <a asp-action="ManageTeachers" class="btn btn-back">
+                                <i class="fas fa-arrow-left me-2"></i>Back to List
+                            </a>
+                            <button type="submit" class="btn btn-submit">
+                                <i class="fas fa-save me-2"></i>Save Teacher
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add focus animations to form controls
+            const inputs = document.querySelectorAll('.form-control');
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.style.transform = 'scale(1.02)';
+                });
+                input.addEventListener('blur', function() {
+                    this.parentElement.style.transform = 'scale(1)';
+                });
+            });
+        });
+    </script>
+}

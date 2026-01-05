@@ -1,0 +1,289 @@
+@model MessManagementSystem.Models.Attendance
+
+@{
+    ViewData["Title"] = "Edit Attendance";
+}
+
+<style>
+    .edit-container {
+        padding: 3rem 0;
+        min-height: 100vh;
+    }
+
+    .edit-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        overflow: hidden;
+        animation: slideUp 0.6s ease-out;
+    }
+
+    .edit-card .card-header {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        padding: 2rem;
+        border: none;
+    }
+
+    .edit-card .card-header h4 {
+        margin: 0;
+        font-weight: 700;
+        text-shadow: 1px 1px 2px rgba(255,255,255,0.3);
+    }
+
+    .info-box {
+        background: linear-gradient(135deg, rgba(17, 153, 142, 0.08) 0%, rgba(56, 239, 125, 0.08) 100%);
+        border: none;
+        border-left: 4px solid #11998e;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .meal-selection-card {
+        border: none;
+        border-radius: 15px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        margin-bottom: 1.5rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .meal-card-wrapper {
+        border-radius: 15px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 3px solid transparent;
+    }
+
+    .meal-card-wrapper.selected {
+        border-color: #28a745;
+        box-shadow: 0 10px 25px rgba(40, 167, 69, 0.3);
+    }
+
+    .meal-card-wrapper:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+
+    .meal-card-wrapper .card {
+        border: none;
+        background: white;
+        border-radius: 12px;
+    }
+
+    .meal-icon {
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .meal-card-wrapper:hover .meal-icon {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    .form-check-input {
+        cursor: pointer;
+        width: 60px;
+        height: 30px;
+    }
+
+    .btn-cancel {
+        background: #11998e;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        color: white;
+    }
+
+    .btn-cancel:hover {
+        background: #38ef7d;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(17, 153, 142, 0.3);
+        color: white;
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        border: none;
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        color: white;
+    }
+
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(17, 153, 142, 0.4);
+        color: white;
+    }
+
+    .warning-box {
+        background: linear-gradient(135deg, rgba(17, 153, 142, 0.15) 0%, rgba(56, 239, 125, 0.15) 100%);
+        border: none;
+        border-left: 4px solid #11998e;
+        border-radius: 12px;
+        padding: 1rem;
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<div class="container edit-container">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card edit-card">
+                <div class="card-header">
+                    <h4>
+                        <i class="fas fa-edit me-2"></i>Edit Attendance
+                    </h4>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    <div class="info-box">
+                        <div class="row align-items-center">
+                            <div class="col-md-1 text-center">
+                                <i class="fas fa-user-circle fa-3x text-primary"></i>
+                            </div>
+                            <div class="col-md-11">
+                                <p class="mb-1"><strong><i class="fas fa-user me-2"></i>Teacher:</strong> @Model.Teacher?.FullName</p>
+                                <p class="mb-1"><strong><i class="fas fa-calendar me-2"></i>Date:</strong> @Model.Date.ToString("dddd, MMMM dd, yyyy")</p>
+                                <p class="mb-0"><strong><i class="fas fa-building me-2"></i>Department:</strong> @Model.Teacher?.Department</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form asp-action="Edit" method="post" class="needs-validation" novalidate>
+                        <input type="hidden" name="id" value="@Model.AttendanceId" />
+                        <input type="hidden" name="returnDate" value="@ViewBag.ReturnDate" />
+                        @Html.AntiForgeryToken()
+
+                        <div class="meal-selection-card">
+                            <div class="card-body p-4">
+                                <h5 class="mb-3 fw-bold text-center">
+                                    <i class="fas fa-utensils me-2"></i>Meal Selection
+                                </h5>
+                                <p class="text-muted text-center mb-4">
+                                    <i class="fas fa-lightbulb me-1"></i>Select or unselect meals. At least one meal must be selected. 
+                                    To remove all meals, use the Delete option instead.
+                                </p>
+
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <div class="meal-card-wrapper @(Model.LunchTaken ? "selected" : "")">
+                                            <div class="card text-center">
+                                                <div class="card-body p-4">
+                                                    <i class="fas fa-hamburger meal-icon text-danger"></i>
+                                                    <h5 class="card-title mb-3 fw-bold">Lunch</h5>
+                                                    <small class="text-muted d-block mb-3">Afternoon meal</small>
+                                                    <div class="form-check form-switch d-flex justify-content-center">
+                                                        <input class="form-check-input" 
+                                                               type="checkbox" 
+                                                               name="lunch" 
+                                                               id="lunch" 
+                                                               value="true"
+                                                               @(Model.LunchTaken ? "checked" : "")>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="meal-card-wrapper @(Model.DinnerTaken ? "selected" : "")">
+                                            <div class="card text-center">
+                                                <div class="card-body p-4">
+                                                    <i class="fas fa-pizza-slice meal-icon text-success"></i>
+                                                    <h5 class="card-title mb-3 fw-bold">Dinner</h5>
+                                                    <small class="text-muted d-block mb-3">Evening meal</small>
+                                                    <div class="form-check form-switch d-flex justify-content-center">
+                                                        <input class="form-check-input" 
+                                                               type="checkbox" 
+                                                               name="dinner" 
+                                                               id="dinner" 
+                                                               value="true"
+                                                               @(Model.DinnerTaken ? "checked" : "")>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="warning-box">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Important:</strong> If this attendance has an associated bill, the bill will be automatically adjusted based on your changes.
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-action="Index" asp-route-date="@ViewBag.ReturnDate" class="btn btn-cancel">
+                                <i class="fas fa-arrow-left me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-save">
+                                <i class="fas fa-save me-2"></i>Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Add visual feedback when toggling switches
+        document.querySelectorAll('.form-check-input').forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                var wrapper = this.closest('.meal-card-wrapper');
+                if (this.checked) {
+                    wrapper.classList.add('selected');
+                } else {
+                    wrapper.classList.remove('selected');
+                }
+            });
+        });
+
+        // Click on card to toggle checkbox
+        document.querySelectorAll('.meal-card-wrapper').forEach(function(wrapper) {
+            wrapper.addEventListener('click', function(e) {
+                if (!e.target.classList.contains('form-check-input')) {
+                    var checkbox = this.querySelector('.form-check-input');
+                    checkbox.checked = !checkbox.checked;
+                    checkbox.dispatchEvent(new Event('change'));
+                }
+            });
+        });
+
+        // Form validation
+        (function() {
+            'use strict';
+            var forms = document.querySelectorAll('.needs-validation');
+            Array.prototype.slice.call(forms).forEach(function(form) {
+                form.addEventListener('submit', function(event) {
+                    var lunch = document.getElementById('lunch').checked;
+                    var dinner = document.getElementById('dinner').checked;
+
+                    if (!lunch && !dinner) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        alert('⚠️ Please select at least one meal. To remove all meals, use the Delete option instead.');
+                        return false;
+                    }
+                }, false);
+            });
+        })();
+    </script>
+}

@@ -1,0 +1,212 @@
+@model List<MessManagementSystem.Models.Bill>
+
+@{
+    ViewData["Title"] = "Pay All Bills";
+    var totalAmount = ViewBag.TotalAmount;
+    var billCount = ViewBag.BillCount;
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-action="Index"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li class="breadcrumb-item"><a asp-action="ViewBills">My Bills</a></li>
+                    <li class="breadcrumb-item active">Pay All Bills</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <!-- Summary Card -->
+            <div class="card border-0 shadow-lg mb-4">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-credit-card"></i> Pay All Unpaid Bills
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <h5><i class="fas fa-info-circle"></i> Payment Summary</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Number of Bills:</strong> @billCount</p>
+                                <p class="mb-0"><strong>Total Amount:</strong> <span class="text-danger fs-4">Rs. @totalAmount</span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Bills Included:</h6>
+                                <ul class="mb-0">
+                                    @foreach (var bill in Model)
+                                    {
+                                        <li>@(new DateTime(bill.Year, bill.Month, 1).ToString("MMMM yyyy")) - Rs. @bill.TotalBill</li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bills Table -->
+                    <div class="table-responsive mb-4">
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Period</th>
+                                    <th>Meals</th>
+                                    <th>Food Bill</th>
+                                    <th>Water Bill</th>
+                                    <th>Previous Balance</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    int counter = 1;
+                                }
+                                @foreach (var bill in Model)
+                                {
+                                    <tr>
+                                        <td>@counter</td>
+                                        <td><strong>@(new DateTime(bill.Year, bill.Month, 1).ToString("MMMM yyyy"))</strong></td>
+                                        <td><span class="badge bg-info">@bill.TotalMealsConsumed</span></td>
+                                        <td>Rs. @bill.FoodBill</td>
+                                        <td>Rs. @bill.WaterBill</td>
+                                        <td>
+                                            @if (bill.UnpaidBalance > 0)
+                                            {
+                                                <span class="text-danger">Rs. @bill.UnpaidBalance</span>
+                                            }
+                                            else
+                                            {
+                                                <span>Rs. 0</span>
+                                            }
+                                        </td>
+                                        <td class="text-end"><strong>Rs. @bill.TotalBill</strong></td>
+                                    </tr>
+                                    counter++;
+                                }
+                            </tbody>
+                            <tfoot class="table-light">
+                                <tr>
+                                    <th colspan="6" class="text-end">Grand Total:</th>
+                                    <th class="text-end text-danger fs-5">Rs. @totalAmount</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <!-- Payment Form -->
+                    <form asp-action="ProcessAllPayments" method="post" id="paymentForm">
+                        @Html.AntiForgeryToken()
+                        
+                        <div class="card border-primary">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0"><i class="fas fa-credit-card"></i> Payment Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-shield-alt"></i> <strong>Test Payment Gateway</strong> - Use test card: 4111111111111111
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="cardNumber" class="form-label fw-bold">
+                                            <i class="fas fa-credit-card"></i> Card Number <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" class="form-control form-control-lg" id="cardNumber" name="cardNumber" 
+                                               placeholder="1234 5678 9012 3456" pattern="[0-9]{16}" maxlength="16" required>
+                                        <small class="text-muted">Enter 16-digit card number</small>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="cardHolderName" class="form-label fw-bold">
+                                            <i class="fas fa-user"></i> Card Holder Name <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" class="form-control form-control-lg" id="cardHolderName" name="cardHolderName" 
+                                               placeholder="JOHN DOE" required>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="expiryDate" class="form-label fw-bold">
+                                            <i class="fas fa-calendar"></i> Expiry Date (MM/YY) <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" class="form-control form-control-lg" id="expiryDate" name="expiryDate" 
+                                               placeholder="12/25" pattern="(0[1-9]|1[0-2])\/[0-9]{2}" maxlength="5" required>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="cvv" class="form-label fw-bold">
+                                            <i class="fas fa-lock"></i> CVV <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" class="form-control form-control-lg" id="cvv" name="cvv" 
+                                               placeholder="123" pattern="[0-9]{3}" maxlength="3" required>
+                                        <small class="text-muted">3-digit security code</small>
+                                    </div>
+                                </div>
+
+                                <hr />
+
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-success btn-lg" id="payButton">
+                                        <i class="fas fa-check-circle"></i> Pay Rs. @totalAmount Now
+                                    </button>
+                                    <a asp-action="ViewBills" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left"></i> Cancel
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Format card number input
+        document.getElementById('cardNumber').addEventListener('input', function (e) {
+            this.value = this.value.replace(/\D/g, '').substring(0, 16);
+        });
+
+        // Format expiry date input
+        document.getElementById('expiryDate').addEventListener('input', function (e) {
+            let value = this.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                this.value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            } else {
+                this.value = value;
+            }
+        });
+
+        // Format CVV input
+        document.getElementById('cvv').addEventListener('input', function (e) {
+            this.value = this.value.replace(/\D/g, '').substring(0, 3);
+        });
+
+        // Form submission confirmation
+        document.getElementById('paymentForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            
+            if (confirm('⚠️ Are you sure you want to pay Rs. @totalAmount for @billCount bill(s)? This action cannot be undone.')) {
+                document.getElementById('payButton').disabled = true;
+                document.getElementById('payButton').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing Payment...';
+                this.submit();
+            }
+        });
+    </script>
+}

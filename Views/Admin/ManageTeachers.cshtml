@@ -1,0 +1,343 @@
+@model IEnumerable<MessManagementSystem.Models.Teacher>
+
+@{
+    ViewData["Title"] = "Manage Teachers";
+}
+
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        color: white;
+        box-shadow: 0 10px 30px rgba(17, 153, 142, 0.3);
+        animation: slideDown 0.5s ease-out;
+    }
+
+    .page-header h2 {
+        margin: 0;
+        font-weight: 700;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .page-header p {
+        margin: 0.5rem 0 0 0;
+        opacity: 0.9;
+    }
+
+    .add-teacher-btn {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        border: none;
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(17, 153, 142, 0.4);
+    }
+
+    .add-teacher-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(17, 153, 142, 0.6);
+    }
+
+    .teachers-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        overflow: hidden;
+        animation: fadeIn 0.6s ease-out 0.2s both;
+    }
+
+    .teachers-card .card-header {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        padding: 1.5rem;
+        border: none;
+    }
+
+    .teachers-card .card-header h5 {
+        margin: 0;
+        font-weight: 600;
+    }
+
+    .table-hover tbody tr {
+        transition: all 0.3s ease;
+    }
+
+    .table-hover tbody tr:hover {
+        background: linear-gradient(90deg, rgba(17, 153, 142, 0.1) 0%, rgba(56, 239, 125, 0.1) 100%);
+        transform: scale(1.01);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .action-btn-group {
+        display: flex;
+        gap: 5px;
+    }
+
+    .action-btn-group .btn {
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        padding: 8px 12px;
+    }
+
+    .action-btn-group .btn-info {
+        background: linear-gradient(135deg, #17a2b8, #138496);
+        border: none;
+    }
+
+    .action-btn-group .btn-info:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(23, 162, 184, 0.4);
+    }
+
+    .action-btn-group .btn-warning {
+        background: linear-gradient(135deg, #11998e, #38ef7d);
+        border: none;
+    }
+
+    .action-btn-group .btn-warning:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(17, 153, 142, 0.4);
+    }
+
+    .action-btn-group .btn-danger {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        border: none;
+    }
+
+    .action-btn-group .btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+    }
+
+    .status-badge {
+        padding: 8px 16px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+
+    .department-badge {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-weight: 500;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #6c757d;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    @@keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    .alert-success {
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+        color: #155724;
+        animation: slideDown 0.5s ease-out;
+    }
+
+    .thead-gradient {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+    }
+
+    .thead-gradient th {
+        border: none;
+        font-weight: 600;
+        padding: 1rem;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header">
+                <div class="d-flex justify-content-between align-items-center flex-wrap">
+                    <div>
+                        <h2><i class="fas fa-chalkboard-teacher me-2"></i>Manage Teachers</h2>
+                        <p>Add, edit, or remove teachers from the system</p>
+                    </div>
+                    <div>
+                        <a asp-action="CreateTeacher" class="btn add-teacher-btn">
+                            <i class="fas fa-plus-circle me-2"></i>Add New Teacher
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card teachers-card">
+                <div class="card-header">
+                    <h5><i class="fas fa-users me-2"></i>Teachers List</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="teachersTable">
+                            <thead class="thead-gradient">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Department</th>
+                                    <th>Username</th>
+                                    <th>Joining Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model != null && Model.Any())
+                                {
+                                    int counter = 1;
+                                    foreach (var teacher in Model)
+                                    {
+                                        <tr>
+                                            <td>@counter</td>
+                                            <td>
+                                                <strong>@teacher.FullName</strong>
+                                            </td>
+                                            <td>
+                                                <a href="mailto:@teacher.Email">
+                                                    <i class="fas fa-envelope"></i> @teacher.Email
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <i class="fas fa-phone"></i> @teacher.PhoneNumber
+                                            </td>
+                                            <td>
+                                                <span class="department-badge">@teacher.Department</span>
+                                            </td>
+                                            <td>
+                                                @if (teacher.User != null)
+                                                {
+                                                    <code class="text-primary">@teacher.User.Username</code>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">N/A</span>
+                                                }
+                                            </td>
+                                            <td>@teacher.JoiningDate.ToString("MMM dd, yyyy")</td>
+                                            <td>
+                                                @if (teacher.IsActive)
+                                                {
+                                                    <span class="badge bg-success status-badge">
+                                                        <i class="fas fa-check-circle me-1"></i>Active
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger status-badge">
+                                                        <i class="fas fa-times-circle me-1"></i>Inactive
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="action-btn-group">
+                                                    <a asp-action="ViewTeacherDetails" asp-route-id="@teacher.TeacherId" 
+                                                       class="btn btn-sm btn-info" title="View Details">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a asp-action="EditTeacher" asp-route-id="@teacher.TeacherId" 
+                                                       class="btn btn-sm btn-warning" title="Edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-danger" 
+                                                            onclick="confirmDelete(@teacher.TeacherId, '@teacher.FullName')" 
+                                                            title="Delete Permanently">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        counter++;
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="9">
+                                            <div class="empty-state">
+                                                <i class="fas fa-users"></i>
+                                                <p class="mb-0">No teachers found. Click "Add New Teacher" to get started.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Form -->
+<form id="deleteForm" method="post" asp-action="DeleteTeacher" style="display:none;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" id="deleteId" name="id" />
+</form>
+
+@section Scripts {
+    <script>
+        function confirmDelete(id, name) {
+            if (confirm(`⚠️ WARNING: Are you sure you want to PERMANENTLY DELETE teacher "${name}"?\n\nThis will remove:\n• Teacher profile\n• Login account\n• All attendance records\n• All billing records\n\nThis action CANNOT be undone!`)) {
+                document.getElementById('deleteId').value = id;
+                document.getElementById('deleteForm').submit();
+            }
+        }
+
+        // Smooth scroll and animations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add stagger animation to table rows
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach((row, index) => {
+                row.style.animation = `fadeIn 0.5s ease-out ${index * 0.05}s both`;
+            });
+        });
+    </script>
+}

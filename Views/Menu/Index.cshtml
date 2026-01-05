@@ -1,0 +1,342 @@
+@model IEnumerable<MessManagementSystem.Models.MenuItem>
+
+@{
+    ViewData["Title"] = User.IsInRole("Admin") ? "Menu Management" : "Weekly Menu";
+    var daysOfWeek = new[] { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
+    var mealTypes = new[] { "Lunch", "Dinner" };
+}
+
+<style>
+    .menu-container {
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .page-header-menu {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        padding: 2.5rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 40px rgba(17, 153, 142, 0.3);
+        animation: slideDown 0.5s ease;
+    }
+
+    .page-header-menu h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .menu-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        animation: fadeIn 0.6s ease;
+    }
+
+    .menu-card .card-header {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        font-weight: 600;
+        font-size: 1.2rem;
+        padding: 1.5rem 2rem;
+        border: none;
+    }
+
+    .menu-card .card-body {
+        padding: 2rem;
+    }
+
+    .add-menu-btn {
+        padding: 0.7rem 1.5rem;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        border: none;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        text-decoration: none;
+        margin-bottom: 1.5rem;
+    }
+
+    .add-menu-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(17, 153, 142, 0.4);
+        color: white;
+    }
+
+    .menu-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .menu-table thead th {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        font-weight: 600;
+        padding: 1.2rem 1rem;
+        border: none;
+        text-align: left;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+    }
+
+    .menu-table thead th:first-child {
+        border-top-left-radius: 12px;
+    }
+
+    .menu-table thead th:last-child {
+        border-top-right-radius: 12px;
+    }
+
+    .menu-table tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #f0f0f0;
+        animation: slideUp 0.4s ease;
+    }
+
+    .menu-table tbody tr:hover {
+        background: linear-gradient(to right, rgba(17, 153, 142, 0.05), rgba(56, 239, 125, 0.05));
+        transform: scale(1.01);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .menu-table tbody td {
+        padding: 1.2rem 1rem;
+        vertical-align: middle;
+        font-size: 0.95rem;
+    }
+
+    .day-cell {
+        font-weight: 700;
+        color: #11998e;
+        font-size: 1rem;
+    }
+
+    .meal-type-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .badge-lunch {
+        background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+        color: #155724;
+    }
+
+    .badge-dinner {
+        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        color: #004085;
+    }
+
+    .price-cell {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: #28a745;
+    }
+
+    .action-btn-group {
+        display: inline-flex;
+        gap: 0.5rem;
+    }
+
+    .action-btn-menu {
+        padding: 0.4rem 0.9rem;
+        font-size: 0.85rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        text-decoration: none;
+    }
+
+    .action-btn-menu:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-edit-menu {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+    }
+
+    .btn-delete-menu {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        animation: pulse 2s ease infinite;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: #e0e0e0;
+        margin-bottom: 1rem;
+    }
+
+    @@keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    @@keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.6;
+        }
+    }
+</style>
+
+<div class="container-fluid menu-container">
+    <div class=\"page-header-menu\">
+        <h2><i class=\"fas fa-clipboard-list\"></i> @ViewData["Title"]</h2>
+    </div>
+
+@if (User.IsInRole("Admin"))
+{
+    <div class="row mb-3">
+        <div class="col-12">
+            <a asp-action="Create" class="add-menu-btn">
+                <i class="fas fa-plus-circle"></i> Add New Menu Item
+            </a>
+        </div>
+    </div>
+}
+
+<div class="menu-card">
+    <div class="card-header">
+        <i class="fas fa-clipboard-list"></i> Weekly Menu Plan
+    </div>
+    <div class="card-body">
+        @if (Model != null && Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="menu-table">
+                    <thead>
+                        <tr>
+                            <th>Day</th>
+                            <th>Meal Type</th>
+                            <th>Item Name</th>
+                            <th>Description</th>
+                            <th>Rate</th>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <th>Actions</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var day in daysOfWeek)
+                        {
+                            var dayItems = Model.Where(m => m.DayOfWeek == day).OrderBy(m => m.MealType);
+                            if (dayItems.Any())
+                            {
+                                var firstItem = true;
+                                foreach (var item in dayItems)
+                                {
+                                    <tr>
+                                        @if (firstItem)
+                                        {
+                                            <td rowspan="@dayItems.Count()" class="align-middle day-cell">
+                                                <strong>@day</strong>
+                                            </td>
+                                            firstItem = false;
+                                        }
+                                        <td>
+                                            @if (item.MealType == "Lunch")
+                                            {
+                                                <span class="meal-type-badge badge-lunch">
+                                                    <i class="fas fa-utensils"></i> @item.MealType
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="meal-type-badge badge-dinner">
+                                                    <i class="fas fa-moon"></i> @item.MealType
+                                                </span>
+                                            }
+                                        </td>
+                                        <td><strong>@item.ItemName</strong></td>
+                                        <td>@item.Description</td>
+                                        <td class="price-cell">Rs. @item.RatePerServing.ToString("N2")</td>
+                                        @if (User.IsInRole("Admin"))
+                                        {
+                                            <td>
+                                                <div class="action-btn-group">
+                                                    <a asp-action="Edit" asp-route-id="@item.MenuItemId" 
+                                                       class="action-btn-menu btn-edit-menu">
+                                                        <i class="fas fa-edit"></i>Edit
+                                                </a>
+                                                <form asp-action="Delete" asp-route-id="@item.MenuItemId" 
+                                                      method="post" class="d-inline"
+                                                      onsubmit="return confirm('Are you sure you want to delete this menu item?');">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="action-btn-menu btn-delete-menu">
+                                                        <i class="fas fa-trash"></i>Delete
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                        }
+                                    </tr>
+                                }
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="fas fa-clipboard fa-3x mb-3"></i>
+                <p>No menu items found. @(User.IsInRole("Admin") ? "Click \"Add New Menu Item\" to get started." : "Menu will be available soon.")</p>
+            </div>
+        }
+    </div>
+</div>

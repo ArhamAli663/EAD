@@ -1,0 +1,192 @@
+@{
+    ViewData["Title"] = "Clear Old Attendance";
+    var availableMonths = ViewBag.AvailableMonths as List<dynamic>;
+    var selectedMonth = ViewBag.SelectedMonth ?? DateTime.Now.Month;
+    var selectedYear = ViewBag.SelectedYear ?? DateTime.Now.Year;
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-action="Index"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li class="breadcrumb-item active">Clear Old Attendance</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Info"] != null)
+    {
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            @TempData["Info"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-trash-alt"></i> Clear Old Attendance Records
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <h6><i class="fas fa-exclamation-triangle"></i> Important Information</h6>
+                        <ul class="mb-0">
+                            <li>You can only clear attendance records for months where the bill is <strong>PAID</strong></li>
+                            <li>If the bill is not generated or not paid, clearing will be blocked</li>
+                            <li>This action will permanently delete all attendance records for the selected month</li>
+                            <li>This helps keep your attendance history clean after bills are settled</li>
+                        </ul>
+                    </div>
+
+                    @if (availableMonths != null && availableMonths.Any())
+                    {
+                        <form asp-action="ClearOldAttendance" method="post">
+                            @Html.AntiForgeryToken()
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="month" class="form-label fw-bold">
+                                        <i class="fas fa-calendar-alt"></i> Select Month
+                                    </label>
+                                    <select name="month" id="month" class="form-select form-select-lg" required>
+                                        @for (int i = 1; i <= 12; i++)
+                                        {
+                                            <option value="@i" selected="@(i == selectedMonth)">
+                                                @(new DateTime(selectedYear, i, 1).ToString("MMMM"))
+                                            </option>
+                                        }
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="year" class="form-label fw-bold">
+                                        <i class="fas fa-calendar"></i> Select Year
+                                    </label>
+                                    <select name="year" id="year" class="form-select form-select-lg" required>
+                                        @for (int y = DateTime.Now.Year - 2; y <= DateTime.Now.Year; y++)
+                                        {
+                                            <option value="@y" selected="@(y == selectedYear)">@y</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-info-circle"></i> Available Months with Attendance</h6>
+                                <div class="d-flex flex-wrap gap-2">
+                                    @foreach (var month in availableMonths)
+                                    {
+                                        <span class="badge bg-primary">
+                                            @(new DateTime((int)month.Year, (int)month.Month, 1).ToString("MMM yyyy"))
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+
+                            <hr />
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-danger btn-lg" 
+                                        onclick="return confirm('⚠️ Are you sure you want to clear all attendance records for the selected month? This action cannot be undone!');">
+                                    <i class="fas fa-trash-alt"></i> Clear Attendance Records
+                                </button>
+                                <a asp-action="Index" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                                </a>
+                            </div>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-info-circle fa-3x mb-3 d-block"></i>
+                            <h5>No Attendance Records Found</h5>
+                            <p class="mb-0">You don't have any attendance records to clear at this time.</p>
+                        </div>
+                        <div class="d-grid mt-3">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Dashboard
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- How It Works Card -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0"><i class="fas fa-question-circle"></i> How It Works</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" 
+                                     style="width: 60px; height: 60px;">
+                                    <i class="fas fa-check fa-2x"></i>
+                                </div>
+                                <h6 class="text-success">Bill Paid</h6>
+                                <p class="small text-muted">You can clear attendance records for any month where your bill is fully paid</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <div class="bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" 
+                                     style="width: 60px; height: 60px;">
+                                    <i class="fas fa-times fa-2x"></i>
+                                </div>
+                                <h6 class="text-danger">Bill Not Generated</h6>
+                                <p class="small text-muted">Cannot clear - admin has not generated the bill for that month yet</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <div class="bg-warning text-dark rounded-circle d-inline-flex align-items-center justify-content-center mb-2" 
+                                     style="width: 60px; height: 60px;">
+                                    <i class="fas fa-clock fa-2x"></i>
+                                </div>
+                                <h6 class="text-warning">Bill Unpaid</h6>
+                                <p class="small text-muted">Cannot clear - you need to pay the bill first before clearing attendance</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Highlight available months
+        document.addEventListener('DOMContentLoaded', function() {
+            const monthSelect = document.getElementById('month');
+            const yearSelect = document.getElementById('year');
+            
+            monthSelect.classList.add('border-primary');
+            yearSelect.classList.add('border-primary');
+        });
+    </script>
+}

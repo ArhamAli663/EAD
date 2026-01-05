@@ -1,0 +1,344 @@
+@model MessManagementSystem.Models.Teacher
+
+@{
+    ViewData["Title"] = "Teacher Dashboard";
+    var monthlyAttendance = ViewBag.MonthlyAttendance as List<MessManagementSystem.Models.Attendance>;
+    var unpaidBills = ViewBag.UnpaidBills as List<MessManagementSystem.Models.Bill>;
+}
+
+<style>
+    /* Dashboard works in both light and dark modes */
+    .teacher-dashboard .card {
+        background-color: var(--bg-secondary) !important;
+        border: 2px solid var(--border-color) !important;
+    }
+
+    .teacher-dashboard .card-body {
+        color: var(--text-primary) !important;
+    }
+
+    .teacher-dashboard h2,
+    .teacher-dashboard h3,
+    .teacher-dashboard h4,
+    .teacher-dashboard h5,
+    .teacher-dashboard h6 {
+        color: var(--text-primary) !important;
+        font-weight: 700 !important;
+    }
+
+    .teacher-dashboard p,
+    .teacher-dashboard span:not(.badge),
+    .teacher-dashboard div {
+        color: var(--text-primary) !important;
+        font-weight: 600 !important;
+    }
+
+    .teacher-dashboard .text-muted {
+        color: var(--text-secondary) !important;
+        font-weight: 600 !important;
+    }
+
+    .teacher-dashboard .stat-number {
+        font-size: 2.5rem !important;
+        font-weight: 800 !important;
+        color: var(--text-primary) !important;
+    }
+
+    .teacher-dashboard .badge {
+        font-weight: 700 !important;
+        padding: 0.5rem 1rem !important;
+        font-size: 0.9rem !important;
+    }
+
+    [data-theme="dark"] .teacher-dashboard .bg-gradient {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important;
+    }
+</style>
+
+<div class="teacher-dashboard">
+
+@if (Model == null)
+{
+    <div class="alert alert-danger m-4">
+        <h4>Error Loading Dashboard</h4>
+        <p>Unable to load teacher profile. Please contact administrator.</p>
+    </div>
+}
+else
+{
+<div class="container-fluid py-4" style="background-color: var(--bg-primary) !important;">
+
+    <!-- Welcome Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%) !important; border: none !important;">
+                <div class="card-body p-4" style="background: transparent !important;">
+                    <h2 class="mb-3" style="color: #ffffff !important; font-weight: 800 !important;">
+                        <i class="fas fa-user-circle" style="color: #ffffff !important;"></i> Welcome, @Model.FullName!
+                    </h2>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-2" style="color: #ffffff !important; font-weight: 700 !important; font-size: 1.1rem;">
+                                <i class="fas fa-envelope" style="color: #ffffff !important;"></i> <strong style="color: #ffffff !important;">Email:</strong> @Model.Email
+                            </p>
+                            <p class="mb-2" style="color: #ffffff !important; font-weight: 700 !important; font-size: 1.1rem;">
+                                <i class="fas fa-phone" style="color: #ffffff !important;"></i> <strong style="color: #ffffff !important;">Phone:</strong> @Model.PhoneNumber
+                            </p>
+                            <p class="mb-0" style="color: #ffffff !important; font-weight: 700 !important; font-size: 1.1rem;">
+                                <i class="fas fa-building" style="color: #ffffff !important;"></i> <strong style="color: #ffffff !important;">Department:</strong> @Model.Department
+                            </p>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <p class="mb-2" style="color: #ffffff !important; font-weight: 700 !important; font-size: 1.1rem;">
+                                <i class="fas fa-calendar-day" style="color: #ffffff !important;"></i> <strong style="color: #ffffff !important;">@DateTime.Now.ToString("dddd, MMMM dd, yyyy")</strong>
+                            </p>
+                            <p class="mb-0" style="color: #ffffff !important; font-weight: 700 !important; font-size: 1.1rem;">
+                                <i class="fas fa-clock" style="color: #ffffff !important;"></i> <strong style="color: #ffffff !important;">@DateTime.Now.ToString("hh:mm tt")</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-12 mb-3">
+            <h5 class="text-muted"><i class="fas fa-chart-bar"></i> Your Monthly Summary</h5>
+            <p class="text-muted small">Quick overview of your mess usage this month</p>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card shadow h-100" style="border-left: 4px solid #11998e !important; background-color: var(--bg-secondary) !important; border: 2px solid var(--border-color) !important;" title="Number of days you attended the mess this month">
+                <div class="card-body text-center">
+                    <div class="mb-2" style="color: #11998e;">
+                        <i class="fas fa-calendar-check fa-3x"></i>
+                    </div>
+                    <h3 class="mb-0 fw-bold" style="color: #11998e;">@monthlyAttendance?.Count</h3>
+                    <p class="text-muted mb-0 mt-2 small"><strong>Days Present</strong></p>
+                    <p class="text-muted mb-0 small">This Month</p>
+                    <small class="text-muted"><i class="fas fa-info-circle"></i> Days you visited the mess</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow h-100" style="border-left: 4px solid #38ef7d !important; background-color: var(--bg-secondary) !important;" title="Total number of meals consumed this month">
+                <div class="card-body text-center">
+                    <div class="mb-2" style="color: #38ef7d;">
+                        <i class="fas fa-utensils fa-3x"></i>
+                    </div>
+                    <h3 class="mb-0 fw-bold" style="color: #38ef7d;">@ViewBag.TotalMeals</h3>
+                    <p class="text-muted mb-0 mt-2 small"><strong>Total Meals</strong></p>
+                    <p class="text-muted mb-0 small">This Month</p>
+                    <small class="text-muted"><i class="fas fa-info-circle"></i> Lunch + Dinner count</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow h-100" style="border-left: 4px solid #ffc107 !important; background-color: var(--bg-secondary) !important;" title="Number of unpaid bills">
+                <div class="card-body text-center">
+                    <div class="text-warning mb-2">
+                        <i class="fas fa-file-invoice-dollar fa-3x"></i>
+                    </div>
+                    <h3 class="mb-0 fw-bold text-warning">@unpaidBills?.Count</h3>
+                    <p class="text-muted mb-0 mt-2 small"><strong>Unpaid Bills</strong></p>
+                    <p class="text-muted mb-0 small">Action Required</p>
+                    <small class="text-muted"><i class="fas fa-exclamation-triangle"></i> Please pay soon</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow h-100" style="border-left: 4px solid #dc3545 !important; background-color: var(--bg-secondary) !important;" title="Total amount pending">
+                <div class="card-body text-center">
+                    <div class="text-danger mb-2">
+                        <i class="fas fa-rupee-sign fa-3x"></i>
+                    </div>
+                    <h3 class="mb-0 fw-bold text-danger">Rs. @(unpaidBills?.Sum(b => b.TotalBill) ?? 0)</h3>
+                    <p class="text-muted mb-0 mt-2 small"><strong>Total Pending</strong></p>
+                    <p class="text-muted mb-0 small">Pay Now</p>
+                    <small class="text-muted"><i class="fas fa-money-bill-wave"></i> Click "My Bills" to pay</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow" style="background-color: var(--bg-secondary) !important;">
+                <div class="card-header text-white" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important; color: white !important;">
+                    <h5 class="mb-0" style="color: white !important;"><i class="fas fa-bolt"></i> Quick Actions</h5>
+                    <p class="mb-0 small">Click any button below to perform common tasks</p>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-light border-start border-4 border-info mb-4">
+                        <p class="mb-0"><i class="fas fa-lightbulb text-info"></i> <strong>Tip:</strong> Use these shortcuts to quickly access important features!</p>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a asp-action="ViewAttendance" class="btn w-100 py-3" style="border: 2px solid #11998e; color: #11998e; background: transparent; transition: all 0.3s;" onmouseover="this.style.background='linear-gradient(135deg, #11998e 0%, #38ef7d 100%)'; this.style.color='white';" onmouseout="this.style.background='transparent'; this.style.color='#11998e';">
+                                <i class="fas fa-calendar-alt fa-2x d-block mb-2"></i>
+                                <strong>View Attendance</strong>
+                                <p class="mb-0 small" style="opacity: 0.7;">Check your meal records</p>
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a asp-action="VerifyAttendance" class="btn w-100 py-3" style="border: 2px solid #ff9800; color: #ff9800; background: transparent; transition: all 0.3s;" onmouseover="this.style.background='#ff9800'; this.style.color='white';" onmouseout="this.style.background='transparent'; this.style.color='#ff9800';">
+                                <i class="fas fa-exclamation-triangle fa-2x d-block mb-2"></i>
+                                <strong>Report Issue</strong>
+                                <p class="mb-0 small" style="opacity: 0.7;">Dispute wrong attendance</p>
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a asp-action="ViewDisputeHistory" class="btn w-100 py-3" style="border: 2px solid #38ef7d; color: #38ef7d; background: transparent; transition: all 0.3s;" onmouseover="this.style.background='#38ef7d'; this.style.color='white';" onmouseout="this.style.background='transparent'; this.style.color='#38ef7d';">
+                                <i class="fas fa-history fa-2x d-block mb-2"></i>
+                                <strong>Dispute History</strong>
+                                <p class="mb-0 small" style="opacity: 0.7;">Track your reports</p>
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a asp-action="ViewBills" class="btn w-100 py-3" style="border: 2px solid #11998e; color: #11998e; background: transparent; transition: all 0.3s;" onmouseover="this.style.background='linear-gradient(135deg, #11998e 0%, #38ef7d 100%)'; this.style.color='white';" onmouseout="this.style.background='transparent'; this.style.color='#11998e';">
+                                <i class="fas fa-file-invoice fa-2x d-block mb-2"></i>
+                                <strong>View Bills</strong>
+                                <p class="mb-0 small" style="opacity: 0.7;">Check & pay bills</p>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a asp-area="" asp-controller="Account" asp-action="ChangePassword" class="btn w-100 py-3" style="border: 2px solid #11998e; color: #11998e; background: transparent; transition: all 0.3s;" onmouseover="this.style.background='linear-gradient(135deg, #11998e 0%, #38ef7d 100%)'; this.style.color='white';" onmouseout="this.style.background='transparent'; this.style.color='#11998e';">
+                                <i class="fas fa-key fa-2x d-block mb-2"></i>
+                                <strong>Change Password</strong>
+                                <p class="mb-0 small" style="opacity: 0.7;">Update security</p>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Attendance -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card border-0 shadow" style="background-color: var(--bg-secondary) !important;">
+                <div class="card-header text-white" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important; color: white !important;">
+                    <h5 class="mb-0" style="color: white !important;"><i class="fas fa-history"></i> Recent Attendance (Current Month)</h5>
+                </div>
+                <div class="card-body">
+                    @if (monthlyAttendance != null && monthlyAttendance.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Lunch</th>
+                                        <th>Dinner</th>
+                                        <th>Total Meals</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var attendance in monthlyAttendance.Take(10))
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>@attendance.Date.ToString("MMM dd, yyyy")</strong><br />
+                                                <small class="text-muted">@attendance.Date.DayOfWeek</small>
+                                            </td>
+                                            <td>
+                                                @if (attendance.LunchTaken)
+                                                {
+                                                    <span class="badge" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);"><i class="fas fa-check"></i> Yes</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary"><i class="fas fa-times"></i> No</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (attendance.DinnerTaken)
+                                                {
+                                                    <span class="badge" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);"><i class="fas fa-check"></i> Yes</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary"><i class="fas fa-times"></i> No</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <strong>@((attendance.LunchTaken ? 1 : 0) + (attendance.DinnerTaken ? 1 : 0))</strong>
+                                            </td>
+
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a asp-action="ViewAttendance" class="btn text-white" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); border: none;">
+                                <i class="fas fa-list"></i> View All Attendance
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> No attendance records found for this month.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Unpaid Bills -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow" style="background-color: var(--bg-secondary) !important;">
+                <div class="card-header text-white" style="background: linear-gradient(135deg, #ff9800 0%, #ffc107 100%) !important; color: white !important;">
+                    <h5 class="mb-0" style="color: white !important;"><i class="fas fa-exclamation-circle"></i> Pending Bills</h5>
+                </div>
+                <div class="card-body">
+                    @if (unpaidBills != null && unpaidBills.Any())
+                    {
+                        <div class="list-group">
+                            @foreach (var bill in unpaidBills.Take(5))
+                            {
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(bill.Month) @bill.Year</h6>
+                                            <p class="mb-0 text-muted small">Meals: @bill.TotalMealsConsumed</p>
+                                        </div>
+                                        <div class="text-end">
+                                            <strong class="text-danger">Rs. @bill.TotalBill</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <div class="text-center mt-3">
+                            <a asp-action="ViewBills" class="btn text-white" style="background: linear-gradient(135deg, #ff9800 0%, #ffc107 100%); border: none;">
+                                <i class="fas fa-file-invoice-dollar"></i> View All Bills
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert text-white" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); border: none;">
+                            <i class="fas fa-check-circle"></i> No pending bills. You're all paid up!
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+}
