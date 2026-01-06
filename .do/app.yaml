@@ -21,3 +21,6 @@ spec:
         - key: ASPNETCORE_URLS
           scope: RUN_TIME
           value: http://+:8080
+        - key: DatabaseProvider
+          scope: RUN_TIME
+          value: SQLite
