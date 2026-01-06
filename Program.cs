@@ -17,9 +17,18 @@ builder.Services.AddResponseCaching();
 // Add Memory Cache
 builder.Services.AddMemoryCache();
 
-// Add DbContext
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+// Add DbContext - Use SQLite for Production, SQL Server for Development
+var databaseProvider = builder.Configuration["DatabaseProvider"];
+if (databaseProvider == "SQLite")
+{
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+}
+else
+{
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+}
 
 // Add JWT Token Service
 builder.Services.AddScoped<JwtTokenService>();
@@ -92,9 +101,20 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
+        var configuration = services.GetRequiredService<IConfiguration>();
         
-        // Apply migrations
-        context.Database.Migrate();
+        // Apply migrations or create database based on provider
+        var dbProvider = configuration["DatabaseProvider"];
+        if (dbProvider == "SQLite")
+        {
+            // For SQLite, use EnsureCreated to create schema
+            context.Database.EnsureCreated();
+        }
+        else
+        {
+            // For SQL Server, use migrations
+            context.Database.Migrate();
+        }
         
         // Seed admin user if not exists
         if (!context.Users.Any(u => u.Username == "admin"))
@@ -172,6 +192,60 @@ using (var scope = app.Services.CreateScope())
             context.SaveChanges();
         }
         
+        // Seed Pakistani teachers if not exists
+        if (!context.Teachers.Any())
+        {
+            var pakistaniTeachers = new[]
+            {
+                new { FullName = "Muhammad Ahmed Khan", Email = "ahmed.khan@mess.edu.pk", Phone = "0300-1234567", Department = "Computer Science" },
+                new { FullName = "Fatima Zahra Malik", Email = "fatima.malik@mess.edu.pk", Phone = "0321-2345678", Department = "Mathematics" },
+                new { FullName = "Ali Hassan Qureshi", Email = "ali.qureshi@mess.edu.pk", Phone = "0333-3456789", Department = "Physics" },
+                new { FullName = "Ayesha Siddiqui", Email = "ayesha.siddiqui@mess.edu.pk", Phone = "0345-4567890", Department = "Chemistry" },
+                new { FullName = "Usman Tariq", Email = "usman.tariq@mess.edu.pk", Phone = "0312-5678901", Department = "English Literature" },
+                new { FullName = "Zainab Bibi", Email = "zainab.bibi@mess.edu.pk", Phone = "0301-6789012", Department = "Urdu" },
+                new { FullName = "Imran Hussain Shah", Email = "imran.shah@mess.edu.pk", Phone = "0322-7890123", Department = "History" },
+                new { FullName = "Sana Noor", Email = "sana.noor@mess.edu.pk", Phone = "0334-8901234", Department = "Biology" },
+                new { FullName = "Bilal Ahmed Rana", Email = "bilal.rana@mess.edu.pk", Phone = "0346-9012345", Department = "Economics" },
+                new { FullName = "Maryam Khalid", Email = "maryam.khalid@mess.edu.pk", Phone = "0313-0123456", Department = "Psychology" },
+                new { FullName = "Hassan Raza Bukhari", Email = "hassan.bukhari@mess.edu.pk", Phone = "0302-1234568", Department = "Political Science" },
+                new { FullName = "Amna Parveen", Email = "amna.parveen@mess.edu.pk", Phone = "0323-2345679", Department = "Sociology" },
+                new { FullName = "Farhan Ali Chaudhry", Email = "farhan.chaudhry@mess.edu.pk", Phone = "0335-3456780", Department = "Business Administration" },
+                new { FullName = "Hira Batool", Email = "hira.batool@mess.edu.pk", Phone = "0347-4567891", Department = "Fine Arts" },
+                new { FullName = "Asad Mehmood Bhatti", Email = "asad.bhatti@mess.edu.pk", Phone = "0314-5678902", Department = "Physical Education" }
+            };
+            
+            foreach (var teacherData in pakistaniTeachers)
+            {
+                // Create user account for teacher
+                var username = teacherData.Email.Split('@')[0].Replace(".", "_");
+                var teacherUser = new MessManagementSystem.Models.User
+                {
+                    Username = username,
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("teacher123"),
+                    Role = "Teacher",
+                    MustChangePassword = true,
+                    IsActive = true,
+                    CreatedDate = DateTime.Now
+                };
+                context.Users.Add(teacherUser);
+                context.SaveChanges();
+                
+                // Create teacher profile linked to user
+                var teacher = new MessManagementSystem.Models.Teacher
+                {
+                    FullName = teacherData.FullName,
+                    Email = teacherData.Email,
+                    PhoneNumber = teacherData.Phone,
+                    Department = teacherData.Department,
+                    JoiningDate = DateTime.Now.AddMonths(-new Random().Next(1, 24)),
+                    IsActive = true,
+                    UserId = teacherUser.UserId
+                };
+                context.Teachers.Add(teacher);
+            }
+            context.SaveChanges();
+        }
+        
         // Seed sample attendance data if not exists
         if (!context.Attendances.Any())
         {
@@ -230,7 +304,11 @@ else
     app.UseDeveloperExceptionPage();
 }
 
-app.UseHttpsRedirection();
+// Only use HTTPS redirection in development (Docker/reverse proxy handles SSL in production)
+if (app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 app.UseStaticFiles();
 
 // Add response caching middleware

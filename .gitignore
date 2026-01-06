@@ -44,3 +44,11 @@ publish/
 
 # JetBrains Rider
 .idea/
+
+# SQLite Database
+*.db
+*.db-shm
+*.db-wal
+
+# Docker
+.docker/
