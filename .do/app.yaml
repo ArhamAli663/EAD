@@ -1,0 +1,26 @@
+spec:
+  name: mess-management-system
+  region: nyc
+  services:
+    - name: web
+      github:
+        repo: Wahla-007/EAD-Arham
+        branch: master
+        deploy_on_push: true
+      source_dir: /
+      dockerfile_path: Dockerfile
+      http_port: 8080
+      instance_count: 1
+      instance_size_slug: basic-xxs
+      routes:
+        - path: /
+      envs:
+        - key: ASPNETCORE_ENVIRONMENT
+          scope: RUN_TIME
+          value: Production
+        - key: ASPNETCORE_URLS
+          scope: RUN_TIME
+          value: http://+:8080
+        - key: DatabaseProvider
+          scope: RUN_TIME
+          value: SQLite
