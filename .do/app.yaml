@@ -14,6 +14,13 @@ spec:
       instance_size_slug: basic-xxs
       routes:
         - path: /
+      health_check:
+        http_path: /Account/Login
+        initial_delay_seconds: 30
+        period_seconds: 30
+        timeout_seconds: 5
+        success_threshold: 1
+        failure_threshold: 3
       envs:
         - key: ASPNETCORE_ENVIRONMENT
           scope: RUN_TIME
